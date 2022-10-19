@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/public/dashboard.css">
+    <title>Dashboard</title>
+</head>
+<body>
+
+    <header>
+        <nav class="navbar">
+            <a href="#" class="nav-branding" >Ventilation Project - Group 5</a>
+
+            <ul class="nav-menu">
+
+                <li class="nav-item">
+                    <a href="/" class="nav-link">Home</a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="/stats" class="nav-link">Sensors</a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="#" class="nav-link">Users stats</a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="#" class="nav-link">Log out</a>
+                </li>
+
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+
+            </div>
+        </nav>
+    </header>
+
+    <!-- <div class="rotate-container">
+        <img src="/public/fan.svg" alt="fan-svg" id="svg">
+    </div> -->
+
+    <main class="w-full px-3 py-32 relative flex flex-row border-b-2 border-r-2 border-l-2 border-indigo-300 rounded-b-2xl" id="main_content">
+        <section class="w-1/3 flex flex-row items-center justify-center">
+            <object type="image/svg+xml" data="../public/fan.svg" class="fanSvg w-3/4 h-3/4"></object>
+        </section>
+        <section class="w-2/3 flex flex-col items-center my-auto">
+            <div>
+                <label class="switch">
+                    <input type="checkbox" id="toggleBtn">
+                    <div class="slider round">
+                        <span class="manual">Manual</span>
+                        <span class="auto">Auto</span>
+                    </div>
+                </label>
+            </div>
+            <div class="slidercontainer" id="sliderPressureContainer">
+                <div class="mb-2">Pressure</div>
+                <input type="range" min="0" max="120" class="sliderPressure" id="sliderPressure">
+                <div class="mt-1" id="displayPressure"></div>
+            </div>
+            <div class="slidercontainer" id="sliderSpeedContainer">
+                <div class="mb-2">Fan speed</div>
+                <input type="range" min="0" max="100" class="sliderSpeed" id="sliderSpeed">
+                <div class="mt-1" id="displaySpeed"></div>
+            </div>
+            <div class="">
+                <p class="text-left" id="pressure"></p>
+                <p class="text-left" id="speed"></p>
+            </div>
+        </section>
+    </main>
+
+
+    <script>
+        // nav menu 
+        const hamburger = document.querySelector(".hamburger");
+        const navMenu = document.querySelector(".nav-menu");
+
+        hamburger.addEventListener("click" ,() => {
+            hamburger.classList.toggle("active");
+            navMenu.classList.toggle("active");
+        })
+
+        document.querySelectorAll(".nav-link").forEach( n => n.addEventListener("click", () => {
+            hamburger.classList.remove("active")
+            navMenu.classList.remove("active")
+        }))
+
+
+        // rotate image
+    //     const img = document.querySelector("#svg");
+    //     let rtdeg = 0;
+    //     // console.log(img);
+    //     setInterval(()=> {
+    //         rtdeg++;
+    //         if (rtdeg == 360) rtdeg = 0;
+    //         // img.style.transform = 'rotate("+rtdeg"deg)';
+    //         img.style.transform = `rotate(${rtdeg}deg)`;
+    //     }, 10)
+    // </script>
+        <script src="js/anime.min.js"></script>
+
+</body>
+</html>

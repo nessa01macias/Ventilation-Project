@@ -3,35 +3,26 @@ const app = express()
 const mqtt = require('mqtt');
 const mongoose = require('mongoose');
 const path = require('path');
-const Data = require("./models/Data")
 const PORT = 3000;
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view-engine', 'ejs')
 
+// data
+const Data = require("./models/Data")
+
+
 mongoose.connect('mongodb://localhost:27017/sensors_data', () => {
     console.log("connection to Goose has been established")
 }, e => console.error(e))
 
+app.use(express.static(__dirname));
+
 
 app.get("/", (req, res) => {
-    res.render("index.ejs",)
+    res.render("dashboard.ejs",)
 })
 
-app.get("/login", (req, res) => {
-    res.render("login.ejs")
-})
-
-app.post("/login", (req, res) => {
-    res.render("login.ejs")
-})
-
-app.get("/register", (req, res) => {
-    res.render("register.ejs")
-})
-
-app.post("/register", (req, res) => {
-})
 
 
 app.get("/stats", (req, res) => {
@@ -87,7 +78,7 @@ client.on('message', async function (topic, message) {
         temperature: data.temp
     })
     try {
-        var saved_data = await new_data.save()
+        // var saved_data = await new_data.save()
         // console.log(saved_data)
     } catch (err) {
         console.log(err);
