@@ -10,9 +10,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "animejs": "^3.2.1",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
     "ejs": "^3.1.8",
+    "jsonwebtoken": "^8.5.1",
     "mqtt": "^4.3.7",
     "nodemon": "^2.0.20",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "socket.io": "^4.5.3"
   }
 }

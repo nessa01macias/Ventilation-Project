@@ -1,0 +1,63 @@
+*{
+    text-align: center;
+    align-items: center;
+}
+
+.graphs{
+    height: 1000px;
+    width: 1000px;
+}
+
+h1 {
+    margin-top: 1em;
+    margin-bottom: 1em;
+    font-size: 70px;
+    text-align: center;
+    font-weight: 600;
+    background-image: linear-gradient(to left, rgb(104, 156, 197), rgb(59, 67, 104));
+    -webkit-text-stroke: 1px #422800;
+    color: transparent;
+    background-clip: text;
+    -webkit-background-clip: text;
+}
+
+
+
+
+.button-74 {
+  background-color: rgb(104, 134, 197);
+  border: 2px solid #422800;
+  border-radius: 30px;
+  color: #422800;
+  cursor: pointer;
+  display: inline-block;
+  font-weight: 600;
+  font-size: 18px;
+  padding: 0 18px;
+  line-height: 50px;
+  text-align: center;
+  text-decoration: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.text {
+    color:white;
+}
+
+.button-74:hover {
+  background-color: rgb(59, 67, 104);
+}
+
+.button-74:active {
+  box-shadow: #422800 2px 2px 0 0;
+  transform: translate(2px, 2px);
+}
+
+@media (min-width: 768px) {
+  .button-74 {
+    min-width: 120px;
+    padding: 0 25px;
+  }
+}

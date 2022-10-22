@@ -1,48 +1,54 @@
 const express = require('express')
-const app = express()
 const mqtt = require('mqtt');
 const mongoose = require('mongoose');
 const path = require('path');
-const PORT = 3000;
+const { Server } = require("socket.io");
+const { createServer } = require("http");
+const app = express()
 
-app.set('views', path.join(__dirname, 'views'));
-app.set('view-engine', 'ejs')
+// Socket set.up
+const httpServer = createServer(app);
+const io = new Server(httpServer);
+
+const PORT = 8000;
+
+// EJS
+app.use(express.static('./public'))
+app.set('view engine', 'ejs');
 
 // data
 const Data = require("./models/Data")
 
 
+// Retrieve Data
+function retrieveData() {
+    return Data.find({})
+        .sort({ createdAt: -1 })
+        .limit(10)
+        .exec();
+}
+
+// connection to the db
 mongoose.connect('mongodb://localhost:27017/sensors_data', () => {
     console.log("connection to Goose has been established")
 }, e => console.error(e))
 
-app.use(express.static(__dirname));
 
-
-app.get("/", (req, res) => {
-    res.render("dashboard.ejs",)
+// serving the dasboard 
+app.get("/dashboard", async (req, res) => {
+    res.render('dashboard.ejs')
 })
 
-
-
-app.get("/stats", (req, res) => {
-    res.render("sensors_chart.ejs")
+// created for later on feching to cliend-side the fan pressure
+app.get("/getFanPressure", async (req, res) => {
+    try {
+        // the last piece of data saved
+        const fanPressure = await retrieveData();
+        res.json(fanPressure[0])
+    } catch (err) {
+        console.log("could not retrieve information from the latest fan pressure")
+    }
 })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -64,8 +70,11 @@ client.on("connect", function (err) {
 
 });
 
+
 client.on('message', async function (topic, message) {
     var data = JSON.parse(message)
+    io.emit("stats", data);
+
     let new_data = new Data({
         nr: data.nr,
         speed: data.speed,
@@ -77,8 +86,9 @@ client.on('message', async function (topic, message) {
         rh: data.rh,
         temperature: data.temp
     })
+    console.log(new_data)
     try {
-        // var saved_data = await new_data.save()
+        //var saved_data = await new_data.save()
         // console.log(saved_data)
     } catch (err) {
         console.log(err);
@@ -92,7 +102,7 @@ app.get("/data", async (req, res) => {
     // today's date
     var isoDate = new Date().toISOString()
     const [onlyDate] = isoDate.split('T');
-    console.log(onlyDate)
+    //console.log(onlyDate)
 
     try {
         // pressure, co2, speed & temperature
@@ -104,6 +114,7 @@ app.get("/data", async (req, res) => {
             let speed = data.speed
             let temperature = data.temperature
             let pressure = data.pressure
+            let auto = data.auto
             // console.log(date)
             const [onlyDateDB] = date.split("T")
             // console.log(onlyDateDB)
@@ -113,7 +124,8 @@ app.get("/data", async (req, res) => {
                     "pressure": pressure,
                     "co2": co2,
                     "speed": speed,
-                    "temperature": temperature
+                    "temperature": temperature,
+                    "auto": auto
                 })
             }
         }
@@ -125,7 +137,13 @@ app.get("/data", async (req, res) => {
 })
 
 
-app.listen(PORT, function (err) {
+app.get("/stats", (req, res) => {
+    res.render("sensors_chart.ejs")
+})
+
+
+
+httpServer.listen(PORT, function (err) {
     if (err) console.log("Error in server setup")
     console.log("Server listening on Port", PORT);
 })

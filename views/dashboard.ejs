@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/public/dashboard.css">
+    <link rel="stylesheet" href="/nav.css">
+    <link rel="stylesheet" href="/dashboard.css">
+
     <title>Dashboard</title>
 </head>
 <body>
@@ -16,7 +18,7 @@
             <ul class="nav-menu">
 
                 <li class="nav-item">
-                    <a href="/" class="nav-link">Home</a>
+                    <a href="/dashboard" class="nav-link">Home</a>
                 </li>
 
                 <li class="nav-item">
@@ -46,16 +48,16 @@
     </div> -->
 
     <main class="w-full px-3 py-32 relative flex flex-row border-b-2 border-r-2 border-l-2 border-indigo-300 rounded-b-2xl" id="main_content">
-        <section class="w-1/3 flex flex-row items-center justify-center">
-            <object type="image/svg+xml" data="../public/fan.svg" class="fanSvg w-3/4 h-3/4"></object>
+        <section class="w-1/3 flex flex-row items-center justify-center" >
+            <object type="image/svg+xml" data="/fan.svg" class="fanSvg w-3/4 h-3/4" id="fan"></object>
         </section>
         <section class="w-2/3 flex flex-col items-center my-auto">
             <div>
                 <label class="switch">
                     <input type="checkbox" id="toggleBtn">
                     <div class="slider round">
-                        <span class="manual">Manual</span>
-                        <span class="auto">Auto</span>
+                        <span class="manual" id="toggle-text">Manual</span>
+                        <span class="auto" id="toggle2-text">Auto</span>
                     </div>
                 </label>
             </div>
@@ -92,19 +94,57 @@
             navMenu.classList.remove("active")
         }))
 
+        async function main(){
+
+            let recievedData = await fetch('http://localhost:8000/getFanPressure')
+            let stats = await recievedData.json()
+            console.log(stats)
+
+            document.getElementById("sliderPressure").value =  stats.setpoint  
+            document.getElementById("displayPressure").innerHTML =  stats.setpoint  + "Pa"
+
+            document.getElementById("sliderSpeed").value =  stats.speed ;
+            document.getElementById("displaySpeed").innerHTML =  stats.speed  + "%"
+
+            document.getElementById("speed").innerHTML = "Current fan speed: " +  stats.speed  + "%"
+            document.getElementById("pressure").innerHTML = "Current presssure: " +  stats.pressure  + "Pa"
+
+            let pressure_container = document.getElementById("sliderPressureContainer");
+            let speed_container = document.getElementById("sliderSpeedContainer");
+
+            // This part hides the range when the correct mode is hidden; manual -> fan speed , auto -> pressure
+            if (stats.auto) {
+                document.getElementById("speed").hidden = false
+
+                document.getElementById("toggleBtn").checked = true
+                pressure_container.hidden = false;
+                speed_container.hidden = true;
+            }
+            else {
+                document.getElementById("speed").hidden = true
+
+                document.getElementById("toggleBtn").checked = false
+                pressure_container.hidden = true;
+                speed_container.hidden = false;
+            }
+        }
+
+        main()
 
         // rotate image
-    //     const img = document.querySelector("#svg");
-    //     let rtdeg = 0;
-    //     // console.log(img);
-    //     setInterval(()=> {
-    //         rtdeg++;
-    //         if (rtdeg == 360) rtdeg = 0;
-    //         // img.style.transform = 'rotate("+rtdeg"deg)';
-    //         img.style.transform = `rotate(${rtdeg}deg)`;
-    //     }, 10)
-    // </script>
-        <script src="js/anime.min.js"></script>
+        const img = document.querySelector("#fan");
+        let rtdeg = 0;
+        // console.log(img);
+        setInterval(()=> {
+            rtdeg++;
+            if (rtdeg == 360) rtdeg = 0;
+            // img.style.transform = 'rotate("+rtdeg"deg)';
+            img.style.transform = `rotate(${rtdeg}deg)`;
+        }, 10)
+        </script>
+        <script src="/js/handler.js"></script> 
+        <script src="/js/sockets.js"></script> 
+
 
 </body>
 </html>
