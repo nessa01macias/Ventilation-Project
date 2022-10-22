@@ -23,7 +23,7 @@ mongoose.connect(process.env.MONGODB_URI,{ useNewUrlParser: true, useUnifiedTopo
   }
 });
 
-const userRoute = require('./routes/User')
+const userRoute = require('./routes/Routes.js')
 
 // Require static assets from public folder 
 app.use(express.static(path.join(__dirname, 'public')));

@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ABB Project</title>
+    <title>ABB - Login</title>
     <link
       href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
       rel="stylesheet"
@@ -17,21 +17,23 @@
   <body>
     <div class="sidenav">
       <div class="login-main-text">
-        <h2>
-          ABB PROJECT GROUP 5<br />
-          Login Page
-        </h2>
-        <p>Login from here to access.</p>
+        <h1>
+          Login<br/>
+        </h1>
+        <h4>
+          ABB Project group 5<br/>
+        </h4>
+        <p>Login from here to access the dashboard.</p>
       </div>
     </div>
     <div class="main">
       <div class="col-md-6 col-sm-12">
         <div class="login-form">
-          <form action="/dashboard" method="post">
+          <form action="/" method="post">
           <form>
             <div class="form-group">
-              <label>User Name</label>
-              <input type="text" class="form-control" placeholder="User Name" />
+              <label>Username</label>
+              <input type="text" class="form-control" placeholder="Username" />
             </div>
             <div class="form-group">
               <label>Password</label>
@@ -44,6 +46,8 @@
             <button type="submit" class="btn btn-black">Login</button>
           </form>
         </div>
+        </br>
+        <a href="/register">Register now!</a>
       </div>
     </div>
   </body>
