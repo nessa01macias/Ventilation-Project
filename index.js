@@ -107,10 +107,9 @@ app.get("/getFanPressure", async (req, res) => {
 // MQTT CONFIGURATION - SUBSCRIBING & SAVING THE INFO TO A DATABASE
 const addr = 'mqtt://192.168.56.1:1883';
 
-let default_sub_topic = "controller/settings"
-let default_pub_topic = "controller/status"
+let default_pub_topic = "controller/settings"
+let default_sub_topic = "controller/status"
 const client = mqtt.connect(addr);
-const publisher = mqtt.connect(addr);
 
 
 client.on("connect", function (err) {
@@ -134,8 +133,8 @@ client.on('message', async function (topic, message) {
     })
     console.log(new_data)
     try {
-        //  var saved_data = await new_data.save()
-        // console.log(saved_data)
+        var saved_data = await new_data.save()
+        console.log(saved_data)
     } catch (err) {
         console.log(err);
     }
@@ -208,13 +207,9 @@ app.post("/update", (req, res) => {
         information["speed"] = req.body.sliderSpeed
     }
     // console.log("we are in ", JSON.stringify(information))
-    publisher.on("connect", function () {
-        // publishing
-        console.log("client publishing")
-        publisher.publish(default_pub_topic, JSON.stringify(information));
-        console.log(`Send '${JSON.stringify(information)}' from topic '${default_pub_topic}'`)
-    })
-
+    // publishing
+    client.publish(default_pub_topic, JSON.stringify(information));
+    console.log(`Send '${JSON.stringify(information)}' from topic '${default_pub_topic}'`)
     res.redirect('dashboard')
 })
 
