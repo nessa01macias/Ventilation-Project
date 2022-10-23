@@ -133,8 +133,8 @@ client.on('message', async function (topic, message) {
     })
     // console.log(new_data)
     try {
-        // var saved_data = await new_data.save()
-        // console.log(saved_data)
+        var saved_data = await new_data.save()
+        console.log(saved_data)
     } catch (err) {
         console.log(err);
     }
@@ -210,7 +210,6 @@ app.post("/update", (req, res) => {
     // publishing
     client.publish(default_pub_topic, JSON.stringify(information));
     console.log(`Send '${JSON.stringify(information)}' from topic '${default_pub_topic}'`)
-    res.redirect('dashboard')
 })
 
 app.get("/stats", (req, res) => {

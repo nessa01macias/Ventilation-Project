@@ -63,17 +63,18 @@
                         </div>
                     </label>
                 </div>
+                <div id ="twoSliders">
+                    <div class="slidercontainer" id="sliderPressureContainer">
+                        <div class="mb-2">Pressure</div>
+                        <input type="range" min="0" max="120" name="sliderPressure" class="sliderPressure" id="sliderPressure">
+                        <div class="mt-1" id="displayPressure"></div>
+                    </div>
 
-                <div class="slidercontainer" id="sliderPressureContainer">
-                    <div class="mb-2">Pressure</div>
-                    <input type="range" min="0" max="120" name="sliderPressure" class="sliderPressure" id="sliderPressure">
-                    <div class="mt-1" id="displayPressure"></div>
-                </div>
-
-                <div class="slidercontainer" id="sliderSpeedContainer">
-                    <div class="mb-2">Fan speed</div>
-                    <input type="range" min="0" max="100" name="sliderSpeed" class="sliderSpeed" id="sliderSpeed">
-                    <div class="mt-1" id="displaySpeed"></div>
+                    <div class="slidercontainer" id="sliderSpeedContainer">
+                        <div class="mb-2">Fan speed</div>
+                        <input type="range" min="0" max="100" name="sliderSpeed" class="sliderSpeed" id="sliderSpeed">
+                        <div class="mt-1" id="displaySpeed"></div>
+                    </div>
                 </div>
 
                 <div id="divbutton">
@@ -118,6 +119,8 @@
         }
 
         function startLiveUpdate(){
+
+
             setInterval(function (){
                 fetch('http://localhost:8000/getFanPressure').then(function(response){
                     // console.log(response)
@@ -126,20 +129,29 @@
                     var currentStatus = "auto"
                     if (!data.auto) currentStatus = "manual"
 
+                    // date conversion 
                     let ISOdate = data.createdAt
                     date = ISOdate.split("T")[0]
                     time = ISOdate.split("T")[1]
                     time = time.substring(0, 8)
+                    h = time.split(":")
+                    n = (parseInt(h[0]) + 3) % 24
+                    if (n.length === 1){
+                    n= "0" + n;
+                    }
+                    time = n + ":" + h[1] + ":" + h[2]
 
                     document.getElementById("mode").innerHTML = "Current mode: " +  currentStatus 
                     document.getElementById("speed").innerHTML = "Current fan speed: " +  data.speed  + "%"
                     document.getElementById("pressure").innerHTML = "Current presssure: " +  data.pressure  + "Pa"
                     document.getElementById("co2").innerHTML = "Current co2: " +  data.co2  + "co2"
                     document.getElementById("time").innerHTML = "Current time: " +  date  + " "+ time
+
+
                 }).catch( function(error){
                     console.log(error)
                 })
-            }, 10000);
+            }, 1000);
         }
 
         document.addEventListener('DOMContentLoaded', function(){
@@ -158,6 +170,8 @@
             // img.style.transform = 'rotate("+rtdeg"deg)';
             img.style.transform = `rotate(${rtdeg}deg)`;
         }, 10)
+
+
         </script>
         <script src="/js/nav.js"></script>    
         <script src="/js/handler.js"></script> 
