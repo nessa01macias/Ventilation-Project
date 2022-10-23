@@ -131,10 +131,10 @@ client.on('message', async function (topic, message) {
         rh: data.rh,
         temperature: data.temp
     })
-    console.log(new_data)
+    // console.log(new_data)
     try {
-        var saved_data = await new_data.save()
-        console.log(saved_data)
+        // var saved_data = await new_data.save()
+        // console.log(saved_data)
     } catch (err) {
         console.log(err);
     }
