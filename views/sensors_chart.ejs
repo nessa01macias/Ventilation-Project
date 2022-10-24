@@ -26,11 +26,11 @@
               </li>
 
               <li class="nav-item">
-                  <a href="#" class="nav-link">Users stats</a>
+                  <a href="/userstats" class="nav-link">Users stats</a>
               </li>
 
               <li class="nav-item">
-                  <a href="#" class="nav-link">Log out</a>
+                  <a href="/logout" class="nav-link">Log out</a>
               </li>
 
           </ul>
@@ -57,8 +57,31 @@
             <canvas class="charts" id="myPieChart"></canvas> 
         </div>
     </div>
+
+    <div class="chartCard">
+        <div class="chartBox2">
+            <canvas class="charts" id="myPressureChart"></canvas>
+        </div>
+
+        <div class="chartBox2">
+            <canvas class="charts" id="myCo2Chart"></canvas>
+        </div>
+
+        <div class="chartBox2">
+            <canvas class="charts" id="mySpeedChart"></canvas>
+        </div>
+
+        <div class="chartBox2">
+            <canvas class="charts" id="myTempatureChart"></canvas>
+        </div>
+
+    </div>
+
+
     <button class="button-74" role="button"  onclick="updateCharts()"><span class="text">Update graph</span></button>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 
     <script src="/js/nav.js"></script>    
     <script src="/js/charts.js"></script>    

@@ -93,9 +93,9 @@ client.on("connect", function (err) {
 });
 
 client.on('message', async function (topic, message) {
-    console.log(message)
+    // console.log(message)
     var data = JSON.parse(message)
-    console.log("data gotten is", data)
+    // console.log("data gotten is", data)
     let new_data = new Data({
         nr: data.nr,
         speed: data.speed,
@@ -105,9 +105,10 @@ client.on('message', async function (topic, message) {
         error: data.error,
         co2: data.co2,
         rh: data.rh,
-        temperature: data.temp
+        temperature: data.temp,
+        date: new Date().toJSON().slice(0, 10).replace(/-/g, '/')
     })
-    console.log(new_data)
+    // console.log(new_data)
     try {
         var saved_data = await new_data.save()
         console.log(saved_data)
@@ -185,9 +186,6 @@ app.post("/update", (req, res) => {
     console.log(`Send '${JSON.stringify(information)}' from topic '${default_pub_topic}'`)
 })
 
-app.get("/stats", (req, res) => {
-    res.render("sensors_chart.ejs")
-})
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ` + PORT);
@@ -237,13 +235,23 @@ app.post('/', async (req, res) => {
 });
 
 app.get('/dashboard', (req, res) => {
-    console.log(loggedInUser);
+    // console.log(loggedInUser);
     if (loggedInUser == null) {
         res.redirect('/'); //send to login page
     } else {
         res.render('dashboard.ejs'); // redirect to dashboard if logged in
     }
 });
+
+app.get("/stats", (req, res) => {
+    res.render("sensors_chart.ejs")
+    // if (loggedInUser == null) {
+    //     res.redirect('/'); //send to login page
+    // } else {
+    //     res.render("sensors_chart.ejs") // redirect to sensors_chart if logged in
+    // }
+})
+
 
 app.get('/logout', (req, res) => {
     loggedInUser = null;

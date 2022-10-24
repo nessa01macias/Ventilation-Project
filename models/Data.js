@@ -38,6 +38,10 @@ const dataSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    date: {
+        type: String,
+        required: true
+    }
 }, { timestamps: true });
 
 const Data = mongoose.model('data', dataSchema)
