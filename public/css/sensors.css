@@ -5,6 +5,11 @@
     padding: 0;
 }
 
+#datediv {
+  width: 100%;
+}
+
+
 .chartBox {
   margin-top: 3em;
   margin-bottom: 2em;
@@ -63,6 +68,8 @@ h1 {
 
 
 .button-74 {
+  margin-top:1em;
+  margin-bottom: 3em;
   background-color: rgb(104, 134, 197);
   border: 2px solid #422800;
   border-radius: 30px;
@@ -72,7 +79,7 @@ h1 {
   font-weight: 600;
   font-size: 18px;
   padding: 0 18px;
-  line-height: 50px;
+  line-height: 30px;
   text-align: center;
   text-decoration: none;
   user-select: none;
@@ -92,6 +99,19 @@ h1 {
   box-shadow: #422800 2px 2px 0 0;
   transform: translate(2px, 2px);
 }
+
+
+/* validation message */
+.error {
+  color: #ffffff;
+  text-align: left;
+  background-color: #750d0d;
+  padding: 2px 13px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+
 
 @media (min-width: 768px) {
   .button-74 {

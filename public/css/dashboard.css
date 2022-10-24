@@ -20,7 +20,6 @@
 .switch input {display:none;}
 
 
-
 .slider {
     position: absolute;
     cursor: pointer;
@@ -201,7 +200,7 @@ cursor: pointer;
     font-weight: 600;
     font-size: 18px;
     padding: 0 18px;
-    line-height: 50px;
+    line-height: 40px;
     text-align: center;
     text-decoration: none;
     user-select: none;
@@ -209,6 +208,11 @@ cursor: pointer;
     touch-action: manipulation;
   }
   
+.information {
+    margin-bottom: 10em;
+}
+
+
   .text {
       color:white;
   }

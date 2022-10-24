@@ -12,65 +12,73 @@ async function gettingLastData() {
 
 // Fetch Block for fetching the data from the sensors
 function updateCharts() {
-    async function fetchData() {
-        // pressure, co2, speed & temperature
-        let data_json = await gettingData()
-        let pressure = []
-        let co2 = []
-        let speed = []
-        let temperature = []
-        let labels = []
-        let manual = 0
-        let auto = 0
+    setInterval(function () {
+        async function fetchData() {
+            // pressure, co2, speed & temperature
+            let data_json = await gettingData()
+            // console.log(data_json, data_json[0].theRealDate)
+            document.getElementById("theRealDate").innerHTML = data_json[0].theRealDate
 
-        let last_data_json = await gettingLastData()
+            let pressure = []
+            let co2 = []
+            let speed = []
+            let temperature = []
+            let labels = []
+            let manual = 0
+            let auto = 0
 
-        for (let data of data_json) {
-            pressure.push(data['pressure'])
-            co2.push(data['co2'])
-            speed.push(data['speed'])
-            temperature.push(data['temperature'])
-            labels.push(data['date'])
+            let last_data_json = await gettingLastData()
 
-            if (data.auto) {
-                auto = auto + 1
-            } else if (!data.auto) {
-                manual = manual + 1
+            for (let data of data_json) {
+                pressure.push(data['pressure'])
+                co2.push(data['co2'])
+                speed.push(data['speed'])
+                temperature.push(data['temperature'])
+                labels.push(data['date'])
+
+                if (data.auto) {
+                    auto = auto + 1
+                } else if (!data.auto) {
+                    manual = manual + 1
+                }
+
             }
+            // console.log([labels, pressure, co2, speed, temperature])
+            datapoints = [[labels, pressure, co2, speed, temperature], [auto, manual], [last_data_json.pressure, last_data_json.co2, last_data_json.speed, last_data_json.temperature]]
+            return datapoints;
+        };
 
-        }
-        // console.log([labels, pressure, co2, speed, temperature])
-        datapoints = [[labels, pressure, co2, speed, temperature], [auto, manual], [last_data_json.pressure, last_data_json.co2, last_data_json.speed, last_data_json.temperature]]
-        return datapoints;
-    };
+        fetchData().then(datapoints => {
+            // console.log(datapoints, myChart)
+            myChart.config.data.labels = datapoints[0][0];
+            myChart.config.data.datasets[0].data = datapoints[0][1];
+            myChart.config.data.datasets[1].data = datapoints[0][2];
+            myChart.config.data.datasets[2].data = datapoints[0][3];
+            myChart.config.data.datasets[3].data = datapoints[0][4];
+            myChart.update();
 
-    fetchData().then(datapoints => {
-        // console.log(datapoints, myChart)
-        myChart.config.data.labels = datapoints[0][0];
-        myChart.config.data.datasets[0].data = datapoints[0][1];
-        myChart.config.data.datasets[1].data = datapoints[0][2];
-        myChart.config.data.datasets[2].data = datapoints[0][3];
-        myChart.config.data.datasets[3].data = datapoints[0][4];
-        myChart.update();
+            myPieChart.config.data.datasets[0].data = datapoints[1];
+            myPieChart.update();
 
-        myPieChart.config.data.datasets[0].data = datapoints[1];
-        myPieChart.update();
+            myPressureChart.config.data.datasets[0].data = [datapoints[2][0], 100 - datapoints[2][0]];
+            myPressureChart.update();
 
-        myPressureChart.config.data.datasets[0].data = [datapoints[2][0], 100 - datapoints[2][0]];
-        myPressureChart.update();
+            myCo2Chart.config.data.datasets[0].data = [datapoints[2][1], 500 - datapoints[2][1]];
+            myCo2Chart.update();
 
-        myCo2Chart.config.data.datasets[0].data = [datapoints[2][1], 500 - datapoints[2][1]];
-        myCo2Chart.update();
+            mySpeedChart.config.data.datasets[0].data = [datapoints[2][2], 100 - datapoints[2][2]];
+            mySpeedChart.update();
 
-        mySpeedChart.config.data.datasets[0].data = [datapoints[2][2], 100 - datapoints[2][2]];
-        mySpeedChart.update();
+            myTempatureChart.config.data.datasets[0].data = [datapoints[2][3], 100 - datapoints[2][3]];
+            myTempatureChart.update();
 
-        myTempatureChart.config.data.datasets[0].data = [datapoints[2][3], 100 - datapoints[2][3]];
-        myTempatureChart.update();
-
-    })
-
+        })
+    }, 2000);
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    updateCharts();
+})
 
 // FIRST CHART
 

@@ -47,7 +47,17 @@
     <div>
         <h1> Sensor's information</h1>
     </div>
-    <h2>Date being displayed is <%= new Date().toJSON().slice(0,10).replace(/-/g,'/') %> </h2>
+
+    <form action="/setdate" method="POST">
+        <div id ="datediv">
+            <label for="date"> <h2>Which date would you want to see?</h2> </label>
+            <input type="date" id="date" name="date" required>
+        </div>
+        <button class="button-74"><span class="text">send data</span></button>
+    </form>
+
+    <h2>Date being displayed is</h2>
+    <h2 id="theRealDate"></h2>
 
     <div class="chartCard">
         <div class="chartBox">
@@ -77,8 +87,6 @@
 
     </div>
 
-
-    <button class="button-74" role="button"  onclick="updateCharts()"><span class="text">Update graph</span></button>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>

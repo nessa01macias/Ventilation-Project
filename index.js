@@ -67,6 +67,8 @@ function retrieveData() {
         .exec();
 }
 
+
+
 // created for later on feching to cliend-side the fan pressure
 app.get("/getFanPressure", async (req, res) => {
     try {
@@ -110,19 +112,65 @@ client.on('message', async function (topic, message) {
     })
     // console.log(new_data)
     try {
-        var saved_data = await new_data.save()
-        console.log(saved_data)
+        // var saved_data = await new_data.save()
+        // console.log(saved_data)
     } catch (err) {
         console.log(err);
     }
 })
 
+
+
+// gets the value of the data in certain date!
+app.post("/setdate", async (req, res) => {
+
+    let onlyDateForm = req.body.date;
+    let date_exists = false;
+
+    var theDate;
+
+    // console.log("the date input is", onlyDateForm)
+    // console.log("the dates from the db are ")
+    try {
+        const datas = await Data.find({})
+        for (let data of datas) {
+            let date = data.createdAt.toISOString()
+            const [onlyDateDB] = date.split("T")
+            console.log(onlyDateDB)
+
+            if (onlyDateForm === onlyDateDB) {
+                date_exists = true;
+                theDate = onlyDateForm;
+            }
+            if (date_exists) break;
+        }
+        console.log("does the date exist in the db? ", date_exists)
+        if (!date_exists) showError('We do not have information from that date!');
+
+        if (theDate) console.log(theDate)
+    } catch (err) {
+        console.log("Could not retrieve the data")
+    }
+
+    res.redirect("/stats")
+
+})
+
 // gets the value of the data in certain date, of the current day!
 app.get("/data", async (req, res) => {
     // today's date
-    var isoDate = new Date().toISOString()
-    const [onlyDate] = isoDate.split('T');
-    //console.log(onlyDate)
+    let isDefined = false;
+    let isoDate = new Date().toISOString()
+    let [theRealDate] = isoDate.split('T');
+
+
+    if (typeof theDate !== 'undefined') {
+        isDefined = true;
+        theRealDate = theDate;
+    }
+
+
+    // console.log("Date being used is", theRealDate, isDefined)
 
     try {
         // pressure, co2, speed & temperature
@@ -130,22 +178,18 @@ app.get("/data", async (req, res) => {
         const sendData = []
         for (let data of datas) {
             let date = data.createdAt.toISOString()
-            let co2 = data.co2
-            let speed = data.speed
-            let temperature = data.temperature
-            let pressure = data.pressure
-            let auto = data.auto
             // console.log(date)
             const [onlyDateDB] = date.split("T")
             // console.log(onlyDateDB)
-            if (onlyDate === onlyDateDB) {
+            if (theRealDate === onlyDateDB) {
                 sendData.push({
+                    "theRealDate": theRealDate,
                     "date": date,
-                    "pressure": pressure,
-                    "co2": co2,
-                    "speed": speed,
-                    "temperature": temperature,
-                    "auto": auto
+                    "pressure": data.pressure,
+                    "co2": data.co2,
+                    "speed": data.speed,
+                    "temperature": data.temperature,
+                    "auto": data.auto
                 })
             }
         }
@@ -244,12 +288,11 @@ app.get('/dashboard', (req, res) => {
 });
 
 app.get("/stats", (req, res) => {
-    res.render("sensors_chart.ejs")
-    // if (loggedInUser == null) {
-    //     res.redirect('/'); //send to login page
-    // } else {
-    //     res.render("sensors_chart.ejs") // redirect to sensors_chart if logged in
-    // }
+    if (loggedInUser == null) {
+        res.redirect('/'); //send to login page
+    } else {
+        res.render("sensors_chart.ejs") // redirect to sensors_chart if logged in
+    }
 })
 
 
