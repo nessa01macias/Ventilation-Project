@@ -105,10 +105,10 @@ app.get("/getFanPressure", async (req, res) => {
 
 
 // MQTT CONFIGURATION - SUBSCRIBING & SAVING THE INFO TO A DATABASE
-const addr = 'mqtt://192.168.56.1:1883';
+const addr = 'mqtt://192.168.1.254:1883';
 
-let default_pub_topic = "controller/settings"
-let default_sub_topic = "controller/status"
+let default_pub_topic = "Group5/controller/settings"
+let default_sub_topic = "iot/G07/status"    /*"Group5/controller/status"*/
 const client = mqtt.connect(addr);
 
 
@@ -118,26 +118,27 @@ client.on("connect", function (err) {
 });
 
 client.on('message', async function (topic, message) {
-    var data = JSON.parse(message)
-
-    let new_data = new Data({
-        nr: data.nr,
-        speed: data.speed,
-        setpoint: data.setpoint,
-        pressure: data.pressure,
-        auto: data.auto,
-        error: data.error,
-        co2: data.co2,
-        rh: data.rh,
-        temperature: data.temp
-    })
-    // console.log(new_data)
-    try {
-        var saved_data = await new_data.save()
-        console.log(saved_data)
-    } catch (err) {
-        console.log(err);
-    }
+    console.log(message)
+    // var data = JSON.parse(message)
+    // console.log("data gotten is", data)
+    // let new_data = new Data({
+    //     nr: data.nr,
+    //     speed: data.speed,
+    //     setpoint: data.setpoint,
+    //     pressure: data.pressure,
+    //     auto: data.auto,
+    //     error: data.error,
+    //     co2: data.co2,
+    //     rh: data.rh,
+    //     temperature: data.temp
+    // })
+    // // console.log(new_data)
+    // try {
+    //     // var saved_data = await new_data.save()
+    //     // console.log(saved_data)
+    // } catch (err) {
+    //     console.log(err);
+    // }
 })
 
 
