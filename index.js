@@ -194,8 +194,7 @@ app.listen(PORT, () => {
 });
 
 
-// Authorization and routing
-
+// AUTHORIZATION AND ROUTING
 
 // Route to register page
 app.get('/register', (req, res) => {
@@ -210,7 +209,11 @@ app.get('/register', (req, res) => {
 app.post('/register', async (req, res) =>{
     crypto.pbkdf2(req.body.password, 'salt', 10000, 64, 'sha512', (err, pbkdf2Key) => {
         if (err) throw err;
-		User.create({ username: req.body.username, password: pbkdf2Key.toString('hex') })
+        if(req.body.teacherCode == process.env.TEACHER_CODE){
+            User.create({ username: req.body.username, password: pbkdf2Key.toString('hex'), isTeacher: true })
+        }else{
+            User.create({ username: req.body.username, password: pbkdf2Key.toString('hex') })
+        }
         res.redirect('/')
     })
 });
@@ -247,7 +250,6 @@ app.get('/logout', (req, res) => {
 	res.redirect('/'); //send to login page
 });
 
-
 //authorizer
 async function myAuthorizer (username, password) {
 	const key = crypto.pbkdf2Sync(password, 'salt', 10000, 64, 'sha512');
@@ -257,8 +259,6 @@ async function myAuthorizer (username, password) {
 	const userQuery = await User.findOne({ username: username, password: key.toString('hex') }).then(user => {
 		if(user) {
 			loggedInUser = user._id;
-			console.log("userid: "+user._id);
-			console.log("ma liu:"+loggedInUser);
 		} else {
 			loggedInUser = null;
             req.flash('error', 'You must be signed in to see the content!');
