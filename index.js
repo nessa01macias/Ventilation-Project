@@ -67,6 +67,8 @@ function retrieveData() {
         .exec();
 }
 
+
+
 // created for later on feching to cliend-side the fan pressure
 app.get("/getFanPressure", async (req, res) => {
     try {
@@ -93,9 +95,9 @@ client.on("connect", function (err) {
 });
 
 client.on('message', async function (topic, message) {
-    console.log(message)
+    // console.log(message)
     var data = JSON.parse(message)
-    console.log("data gotten is", data)
+    // console.log("data gotten is", data)
     let new_data = new Data({
         nr: data.nr,
         speed: data.speed,
@@ -105,23 +107,70 @@ client.on('message', async function (topic, message) {
         error: data.error,
         co2: data.co2,
         rh: data.rh,
-        temperature: data.temp
+        temperature: data.temp,
+        date: new Date().toJSON().slice(0, 10).replace(/-/g, '/')
     })
-    console.log(new_data)
+    // console.log(new_data)
     try {
-        var saved_data = await new_data.save()
-        console.log(saved_data)
+        // var saved_data = await new_data.save()
+        // console.log(saved_data)
     } catch (err) {
         console.log(err);
     }
 })
 
+
+
+// gets the value of the data in certain date!
+app.post("/setdate", async (req, res) => {
+
+    let onlyDateForm = req.body.date;
+    let date_exists = false;
+
+    var theDate;
+
+    // console.log("the date input is", onlyDateForm)
+    // console.log("the dates from the db are ")
+    try {
+        const datas = await Data.find({})
+        for (let data of datas) {
+            let date = data.createdAt.toISOString()
+            const [onlyDateDB] = date.split("T")
+            console.log(onlyDateDB)
+
+            if (onlyDateForm === onlyDateDB) {
+                date_exists = true;
+                theDate = onlyDateForm;
+            }
+            if (date_exists) break;
+        }
+        console.log("does the date exist in the db? ", date_exists)
+        if (!date_exists) showError('We do not have information from that date!');
+
+        if (theDate) console.log(theDate)
+    } catch (err) {
+        console.log("Could not retrieve the data")
+    }
+
+    res.redirect("/stats")
+
+})
+
 // gets the value of the data in certain date, of the current day!
 app.get("/data", async (req, res) => {
     // today's date
-    var isoDate = new Date().toISOString()
-    const [onlyDate] = isoDate.split('T');
-    //console.log(onlyDate)
+    let isDefined = false;
+    let isoDate = new Date().toISOString()
+    let [theRealDate] = isoDate.split('T');
+
+
+    if (typeof theDate !== 'undefined') {
+        isDefined = true;
+        theRealDate = theDate;
+    }
+
+
+    // console.log("Date being used is", theRealDate, isDefined)
 
     try {
         // pressure, co2, speed & temperature
@@ -129,22 +178,18 @@ app.get("/data", async (req, res) => {
         const sendData = []
         for (let data of datas) {
             let date = data.createdAt.toISOString()
-            let co2 = data.co2
-            let speed = data.speed
-            let temperature = data.temperature
-            let pressure = data.pressure
-            let auto = data.auto
             // console.log(date)
             const [onlyDateDB] = date.split("T")
             // console.log(onlyDateDB)
-            if (onlyDate === onlyDateDB) {
+            if (theRealDate === onlyDateDB) {
                 sendData.push({
+                    "theRealDate": theRealDate,
                     "date": date,
-                    "pressure": pressure,
-                    "co2": co2,
-                    "speed": speed,
-                    "temperature": temperature,
-                    "auto": auto
+                    "pressure": data.pressure,
+                    "co2": data.co2,
+                    "speed": data.speed,
+                    "temperature": data.temperature,
+                    "auto": data.auto
                 })
             }
         }
@@ -185,9 +230,6 @@ app.post("/update", (req, res) => {
     console.log(`Send '${JSON.stringify(information)}' from topic '${default_pub_topic}'`)
 })
 
-app.get("/stats", (req, res) => {
-    res.render("sensors_chart.ejs")
-})
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ` + PORT);
@@ -237,13 +279,22 @@ app.post('/', async (req, res) => {
 });
 
 app.get('/dashboard', (req, res) => {
-    console.log(loggedInUser);
+    // console.log(loggedInUser);
     if (loggedInUser == null) {
         res.redirect('/'); //send to login page
     } else {
         res.render('dashboard.ejs'); // redirect to dashboard if logged in
     }
 });
+
+app.get("/stats", (req, res) => {
+    if (loggedInUser == null) {
+        res.redirect('/'); //send to login page
+    } else {
+        res.render("sensors_chart.ejs") // redirect to sensors_chart if logged in
+    }
+})
+
 
 app.get('/logout', (req, res) => {
     loggedInUser = null;
