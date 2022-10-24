@@ -63,19 +63,24 @@
                         </div>
                     </label>
                 </div>
-                <div class="slidercontainer" id="sliderPressureContainer">
-                    <div class="mb-2">Pressure</div>
-                    <input type="range" min="0" max="120" name="sliderPressure" class="sliderPressure" id="sliderPressure">
-                    <div class="mt-1" id="displayPressure"></div>
+                <div id ="twoSliders">
+                    <div class="slidercontainer" id="sliderPressureContainer">
+                        <div class="mb-2">Pressure</div>
+                        <input type="range" min="0" max="120" name="sliderPressure" class="sliderPressure" id="sliderPressure">
+                        <div class="mt-1" id="displayPressure"></div>
+                    </div>
+
+                    <div class="slidercontainer" id="sliderSpeedContainer">
+                        <div class="mb-2">Fan speed</div>
+                        <input type="range" min="0" max="100" name="sliderSpeed" class="sliderSpeed" id="sliderSpeed">
+                        <div class="mt-1" id="displaySpeed"></div>
+                    </div>
                 </div>
-                <div class="slidercontainer" id="sliderSpeedContainer">
-                    <div class="mb-2">Fan speed</div>
-                    <input type="range" min="0" max="100" name="sliderSpeed" class="sliderSpeed" id="sliderSpeed">
-                    <div class="mt-1" id="displaySpeed"></div>
-                </div>
+
                 <div id="divbutton">
                     <button id="mybutton"><span class="text">Set new mode or values</span></button>
-                  </div>
+                 </div>
+
                  </form>
             <div class="">
                 <br>
@@ -93,20 +98,6 @@
 
 
     <script>
-        // nav menu 
-        const hamburger = document.querySelector(".hamburger");
-        const navMenu = document.querySelector(".nav-menu");
-
-        hamburger.addEventListener("click" ,() => {
-            hamburger.classList.toggle("active");
-            navMenu.classList.toggle("active");
-        })
-
-        document.querySelectorAll(".nav-link").forEach( n => n.addEventListener("click", () => {
-            hamburger.classList.remove("active")
-            navMenu.classList.remove("active")
-        }))
-
 
         let pressure_container = document.getElementById("sliderPressureContainer");
         let speed_container = document.getElementById("sliderSpeedContainer");
@@ -127,23 +118,47 @@
             }
         }
 
-        async function main(){
+        function startLiveUpdate(){
 
-            let recievedData = await fetch('http://localhost:8000/getFanPressure')
-            let stats = await recievedData.json()
-            console.log("the stats ", stats)
 
-            // it sends the last value from the db for the buttom part, the pressure ...
-            var currentStatus = "auto"
-            if (!stats.auto) currentStatus = "manual"
-            document.getElementById("mode").innerHTML = "Current mode: " +  currentStatus 
-            document.getElementById("speed").innerHTML = "Current fan speed: " +  stats.speed  + "%"
-            document.getElementById("pressure").innerHTML = "Current presssure: " +  stats.pressure  + "Pa"
-            document.getElementById("co2").innerHTML = "Current co2: " +  stats.co2  + "co2"
-            document.getElementById("time").innerHTML = "Current time: " +  stats.createdAt  + "Pa"
+            setInterval(function (){
+                fetch('http://localhost:8000/getFanPressure').then(function(response){
+                    // console.log(response)
+                    return response.json()
+                }).then(function(data) {
+                    var currentStatus = "auto"
+                    if (!data.auto) currentStatus = "manual"
+
+                    // date conversion 
+                    let ISOdate = data.createdAt
+                    date = ISOdate.split("T")[0]
+                    time = ISOdate.split("T")[1]
+                    time = time.substring(0, 8)
+                    h = time.split(":")
+                    n = (parseInt(h[0]) + 3) % 24
+                    if (n.length === 1){
+                    n= "0" + n;
+                    }
+                    time = n + ":" + h[1] + ":" + h[2]
+
+                    document.getElementById("mode").innerHTML = "Current mode: " +  currentStatus 
+                    document.getElementById("speed").innerHTML = "Current fan speed: " +  data.speed  + "%"
+                    document.getElementById("pressure").innerHTML = "Current presssure: " +  data.pressure  + "Pa"
+                    document.getElementById("co2").innerHTML = "Current co2: " +  data.co2  + "co2"
+                    document.getElementById("time").innerHTML = "Current time: " +  date  + " "+ time
+
+
+                }).catch( function(error){
+                    console.log(error)
+                })
+            }, 1000);
         }
 
-        main()
+        document.addEventListener('DOMContentLoaded', function(){
+            startLiveUpdate();
+        })
+        
+
 
         // rotate image
         const img = document.querySelector("#fan");
@@ -155,7 +170,10 @@
             // img.style.transform = 'rotate("+rtdeg"deg)';
             img.style.transform = `rotate(${rtdeg}deg)`;
         }, 10)
+
+
         </script>
+        <script src="/js/nav.js"></script>    
         <script src="/js/handler.js"></script> 
 
 

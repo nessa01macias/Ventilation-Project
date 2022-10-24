@@ -81,7 +81,7 @@ app.get("/getFanPressure", async (req, res) => {
 
 
 // MQTT CONFIGURATION - SUBSCRIBING & SAVING THE INFO TO A DATABASE
-const addr = 'mqtt://195.148.98.34:1883';
+const addr = 'mqtt://192.168.56.1:1883';
 
 let default_pub_topic = "controller/settings"
 let default_sub_topic = "controller/status"
@@ -93,8 +93,9 @@ client.on("connect", function (err) {
 });
 
 client.on('message', async function (topic, message) {
+    console.log(message)
     var data = JSON.parse(message)
-
+    console.log("data gotten is", data)
     let new_data = new Data({
         nr: data.nr,
         speed: data.speed,
@@ -182,7 +183,6 @@ app.post("/update", (req, res) => {
     // publishing
     client.publish(default_pub_topic, JSON.stringify(information));
     console.log(`Send '${JSON.stringify(information)}' from topic '${default_pub_topic}'`)
-    res.redirect('dashboard')
 })
 
 app.get("/stats", (req, res) => {
@@ -198,20 +198,20 @@ app.listen(PORT, () => {
 
 // Route to register page
 app.get('/register', (req, res) => {
-    if(loggedInUser==null){
-		res.render('register.ejs'); //send to register page
-	}else{
-		res.redirect('/dashboard'); // redirect to dashboard if logged in
-	}
+    if (loggedInUser == null) {
+        res.render('register.ejs'); //send to register page
+    } else {
+        res.redirect('/dashboard'); // redirect to dashboard if logged in
+    }
 });
 
 // POST registration
-app.post('/register', async (req, res) =>{
+app.post('/register', async (req, res) => {
     crypto.pbkdf2(req.body.password, 'salt', 10000, 64, 'sha512', (err, pbkdf2Key) => {
         if (err) throw err;
-        if(req.body.teacherCode == process.env.TEACHER_CODE){
+        if (req.body.teacherCode == process.env.TEACHER_CODE) {
             User.create({ username: req.body.username, password: pbkdf2Key.toString('hex'), isTeacher: true })
-        }else{
+        } else {
             User.create({ username: req.body.username, password: pbkdf2Key.toString('hex') })
         }
         res.redirect('/')
@@ -220,51 +220,51 @@ app.post('/register', async (req, res) =>{
 
 // Route to login page
 app.get('/', (req, res) => {
-	if(loggedInUser==null){
-		res.render('homepage.ejs'); //send to login page
-	}else{
-		res.redirect('/dashboard'); // redirect to dashboard if logged in
-	}
+    if (loggedInUser == null) {
+        res.render('homepage.ejs'); //send to login page
+    } else {
+        res.redirect('/dashboard'); // redirect to dashboard if logged in
+    }
 });
 
 // POST login
 app.post('/', async (req, res) => {
-	await myAuthorizer(req.body.username, req.body.password);
+    await myAuthorizer(req.body.username, req.body.password);
 
-	if(loggedInUser!=null){
-		res.redirect('/dashboard');
-	}
+    if (loggedInUser != null) {
+        res.redirect('/dashboard');
+    }
 });
 
 app.get('/dashboard', (req, res) => {
     console.log(loggedInUser);
-	if(loggedInUser==null){
-		res.redirect('/'); //send to login page
-	}else{
-		res.render('dashboard.ejs'); // redirect to dashboard if logged in
-	}
+    if (loggedInUser == null) {
+        res.redirect('/'); //send to login page
+    } else {
+        res.render('dashboard.ejs'); // redirect to dashboard if logged in
+    }
 });
 
 app.get('/logout', (req, res) => {
     loggedInUser = null;
-	res.redirect('/'); //send to login page
+    res.redirect('/'); //send to login page
 });
 
 //authorizer
-async function myAuthorizer (username, password) {
-	const key = crypto.pbkdf2Sync(password, 'salt', 10000, 64, 'sha512');
+async function myAuthorizer(username, password) {
+    const key = crypto.pbkdf2Sync(password, 'salt', 10000, 64, 'sha512');
 
-	console.log("to be authed: "+key.toString('hex'));
+    console.log("to be authed: " + key.toString('hex'));
 
-	const userQuery = await User.findOne({ username: username, password: key.toString('hex') }).then(user => {
-		if(user) {
-			loggedInUser = user._id;
-		} else {
-			loggedInUser = null;
+    const userQuery = await User.findOne({ username: username, password: key.toString('hex') }).then(user => {
+        if (user) {
+            loggedInUser = user._id;
+        } else {
+            loggedInUser = null;
             req.flash('error', 'You must be signed in to see the content!');
-		}
-		})
-		.catch(err => {
-			loggedInUser = null;
-		});
+        }
+    })
+        .catch(err => {
+            loggedInUser = null;
+        });
 }

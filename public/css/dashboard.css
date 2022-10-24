@@ -96,7 +96,15 @@ border-radius: 50%;}
 /*----RangeSlider----*/
 
 .slidercontainer {
-width: 100%;
+    width: 70%;
+
+}
+
+#twoSliders {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  
 }
 
 .slider:hover {

@@ -44,17 +44,25 @@
     </header>
 
 
-    <div class="graphs">
-            <div>
-                <h1> Sensor's information</h1>
-            </div>
-            <h3>Date being displayed is <%= new Date().toJSON().slice(0,10).replace(/-/g,'/') %> </h3>
-        <canvas id="myChart" width="1000" height="500"></canvas>
-
-        <button class="button-74" role="button"  onclick="updateChart()"><span class="text">Update graph</span></button>
+    <div>
+        <h1> Sensor's information</h1>
     </div>
+    <h2>Date being displayed is <%= new Date().toJSON().slice(0,10).replace(/-/g,'/') %> </h2>
 
+    <div class="chartCard">
+        <div class="chartBox">
+            <canvas class="charts" id="myChart"></canvas>
+        </div>
+        <div class="chartBox">
+            <canvas class="charts" id="myPieChart"></canvas> 
+        </div>
+    </div>
+    <button class="button-74" role="button"  onclick="updateCharts()"><span class="text">Update graph</span></button>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="/js/nav.js"></script>    
     <script src="/js/charts.js"></script>    
 </body>
 </html>
 
+  
