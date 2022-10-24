@@ -1,7 +1,11 @@
+// configure dotenv
+require('dotenv').config()
+
 const express = require('express')
 const mqtt = require('mqtt');
 const bodyParser = require("body-parser");
 const passport = require("passport");
+const crypto = require('crypto');
 const mongoose = require('mongoose');
 const flash = require("connect-flash")
 const methodOverride = require("method-override");
@@ -10,18 +14,15 @@ const LocalStrategy = require("passport-local");
 const { Server } = require("socket.io");
 const { createServer } = require("http");
 const app = express()
-const userRoute = require('./routes/User')
 const PORT = 8000
 
 
+let loggedInUser = null;
 // data
 const Data = require("./models/Data")
 const User = require('./models/User');
 
 const { isLoggedIn } = require("./middleware/auth")
-
-// configure dotenv
-require('dotenv').config()
 
 // assign mongoose promise library and connect to database
 mongoose.Promise = global.Promise;
@@ -33,7 +34,6 @@ app.use(require("express-session")({
     saveUninitialized: false,
     cookie: { secure: true }
 }))
-
 
 // // configuration
 app.use(express.static('./public'))
@@ -48,34 +48,16 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-
 app.use(function (req, res, next) {
     res.locals.success = req.flash('success');
     res.locals.error = req.flash('error');
     next();
 })
 
-app.use("/", userRoute);
-
 // connection to the db
-mongoose.connect('mongodb://localhost:27017/sensors_data', () => {
+mongoose.connect(process.env.USERDB_URI, () => {
     console.log("connection to Goose has been established")
 }, e => console.error(e))
-
-// // Connects to the mongoDB
-// mongoose.connect(process.env.USERDB_URI, { useNewUrlParser: true, useUnifiedTopology: true }, err => {
-//     if (err) {
-//         console.log('Error in connect the database' + err);
-//     } else {
-//         console.log('Connected to Mongodb');
-//     }
-// });
-
-
-
-
-
-
 
 // Retrieve Data
 function retrieveData() {
@@ -84,12 +66,6 @@ function retrieveData() {
         .limit(10)
         .exec();
 }
-
-// serving the dasboard 
-app.get("/dashboard", async (req, res) => {
-    res.render('dashboard.ejs')
-})
-
 
 // created for later on feching to cliend-side the fan pressure
 app.get("/getFanPressure", async (req, res) => {
@@ -105,12 +81,11 @@ app.get("/getFanPressure", async (req, res) => {
 
 
 // MQTT CONFIGURATION - SUBSCRIBING & SAVING THE INFO TO A DATABASE
-const addr = 'mqtt://192.168.56.1:1883';
+const addr = 'mqtt://195.148.98.34:1883';
 
 let default_pub_topic = "controller/settings"
 let default_sub_topic = "controller/status"
 const client = mqtt.connect(addr);
-
 
 client.on("connect", function (err) {
     client.subscribe(default_sub_topic);
@@ -139,9 +114,6 @@ client.on('message', async function (topic, message) {
         console.log(err);
     }
 })
-
-
-
 
 // gets the value of the data in certain date, of the current day!
 app.get("/data", async (req, res) => {
@@ -220,3 +192,79 @@ app.get("/stats", (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server is running on port ` + PORT);
 });
+
+
+// Authorization and routing
+
+
+// Route to register page
+app.get('/register', (req, res) => {
+    if(loggedInUser==null){
+		res.render('register.ejs'); //send to register page
+	}else{
+		res.redirect('/dashboard'); // redirect to dashboard if logged in
+	}
+});
+
+// POST registration
+app.post('/register', async (req, res) =>{
+    crypto.pbkdf2(req.body.password, 'salt', 10000, 64, 'sha512', (err, pbkdf2Key) => {
+        if (err) throw err;
+		User.create({ username: req.body.username, password: pbkdf2Key.toString('hex') })
+        res.redirect('/')
+    })
+});
+
+// Route to login page
+app.get('/', (req, res) => {
+	if(loggedInUser==null){
+		res.render('homepage.ejs'); //send to login page
+	}else{
+		res.redirect('/dashboard'); // redirect to dashboard if logged in
+	}
+});
+
+// POST login
+app.post('/', async (req, res) => {
+	await myAuthorizer(req.body.username, req.body.password);
+
+	if(loggedInUser!=null){
+		res.redirect('/dashboard');
+	}
+});
+
+app.get('/dashboard', (req, res) => {
+    console.log(loggedInUser);
+	if(loggedInUser==null){
+		res.redirect('/'); //send to login page
+	}else{
+		res.render('dashboard.ejs'); // redirect to dashboard if logged in
+	}
+});
+
+app.get('/logout', (req, res) => {
+    loggedInUser = null;
+	res.redirect('/'); //send to login page
+});
+
+
+//authorizer
+async function myAuthorizer (username, password) {
+	const key = crypto.pbkdf2Sync(password, 'salt', 10000, 64, 'sha512');
+
+	console.log("to be authed: "+key.toString('hex'));
+
+	const userQuery = await User.findOne({ username: username, password: key.toString('hex') }).then(user => {
+		if(user) {
+			loggedInUser = user._id;
+			console.log("userid: "+user._id);
+			console.log("ma liu:"+loggedInUser);
+		} else {
+			loggedInUser = null;
+            req.flash('error', 'You must be signed in to see the content!');
+		}
+		})
+		.catch(err => {
+			loggedInUser = null;
+		});
+}
