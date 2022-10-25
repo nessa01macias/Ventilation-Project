@@ -13,7 +13,7 @@ const UserStatSchema = new mongoose.Schema({
     value: { //value of last controller setting
         type: Number
     }
-}, {timestamps:true}); //timestamp records date of creation and latest update
+}, { timestamps: true }); //timestamp records date of creation and latest update
 
-const UserStats = mongoose.model('data', UserStatSchema)
+const UserStats = mongoose.model('userActivity', UserStatSchema)
 module.exports = UserStats;

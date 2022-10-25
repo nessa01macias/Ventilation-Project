@@ -21,6 +21,7 @@ let loggedInUser = null;
 // data
 const Data = require("./models/Data")
 const User = require('./models/User');
+const userActivity = require("./models/UserStat")
 
 const { isLoggedIn } = require("./middleware/auth")
 
