@@ -65,14 +65,16 @@
                 </div>
                 <div id ="twoSliders">
                     <div class="slidercontainer" id="sliderPressureContainer">
-                        <div class="mb-2">Pressure</div>
-                        <input type="range" min="0" max="120" name="sliderPressure" class="sliderPressure" id="sliderPressure">
+                        <div class="mb-2">Pressure</div><br>
+                        <input type="range" min="0" max="120" name="sliderPressure"  class="sliderPressure thetwoofus" id="sliderPressure">
+                        <br><p id="sliderPressureValue" style="font-size: 1.7rem;  color:rgb(59, 67, 104);"></p>
                         <div class="mt-1" id="displayPressure"></div>
                     </div>
 
                     <div class="slidercontainer" id="sliderSpeedContainer">
-                        <div class="mb-2">Fan speed</div>
-                        <input type="range" min="0" max="100" name="sliderSpeed" class="sliderSpeed" id="sliderSpeed">
+                        <div class="mb-2">Fan speed</div><br>
+                        <input type="range" min="0" max="100" name="sliderSpeed"  class="sliderSpeed thetwoofus" id="sliderSpeed">
+                        <br><p id="sliderSpeedValue" style="font-size: 1.7rem; color:rgb(59, 67, 104);"></p>
                         <div class="mt-1" id="displaySpeed"></div>
                     </div>
                 </div>
@@ -99,28 +101,44 @@
 
     <script>
 
+        // showing the value of the slider
+        let sliderPressure = document.getElementById("sliderPressure");
+        let sliderSpeed = document.getElementById("sliderSpeed");
+
+        let sliderPressureValue = document.getElementById("sliderPressureValue");
+        let sliderSpeedValue = document.getElementById("sliderSpeedValue");
+
+        
+
+        sliderPressureValue.innerHTML = sliderPressure.value; 
+        sliderPressure.oninput = function(){
+            sliderPressureValue.innerHTML = this.value;
+        }
+
+        sliderSpeedValue.innerHTML = sliderSpeed.value; 
+        sliderSpeed.oninput = function(){
+            sliderSpeedValue.innerHTML = this.value;
+        }
+
+
+
+        // This part hides the range when the correct mode is hidden; manual -> fan speed , auto -> pressure
         let pressure_container = document.getElementById("sliderPressureContainer");
         let speed_container = document.getElementById("sliderSpeedContainer");
         speed_container.style.display = 'block';
         pressure_container.style.display = 'none';    
-
-        // This part hides the range when the correct mode is hidden; manual -> fan speed , auto -> pressure
         function toggle(){
             if(document.getElementById("toggleBtn").checked === true) {
                // console.log("i am in auto!!!!!")
                 pressure_container.style.display = 'block';
                 speed_container.style.display = 'none';
-
             } else {
                // console.log("i am in manual!!!!!")
                 pressure_container.style.display = 'none';
                 speed_container.style.display = 'block';
             }
         }
-
         function startLiveUpdate(){
-
-
             setInterval(function (){
                 fetch('http://localhost:8000/getFanPressure').then(function(response){
                     // console.log(response)
@@ -128,7 +146,6 @@
                 }).then(function(data) {
                     var currentStatus = "auto"
                     if (!data.auto) currentStatus = "manual"
-
                     // date conversion 
                     let ISOdate = data.createdAt
                     date = ISOdate.split("T")[0]
@@ -140,26 +157,20 @@
                     n= "0" + n;
                     }
                     time = n + ":" + h[1] + ":" + h[2]
-
                     document.getElementById("mode").innerHTML = "Current mode: " +  currentStatus 
                     document.getElementById("speed").innerHTML = "Current fan speed: " +  data.speed  + "%"
                     document.getElementById("pressure").innerHTML = "Current presssure: " +  data.pressure  + "Pa"
                     document.getElementById("co2").innerHTML = "Current co2: " +  data.co2  + "co2"
                     document.getElementById("time").innerHTML = "Current time: " +  date  + " "+ time
-
-
                 }).catch( function(error){
                     console.log(error)
                 })
             }, 2000);
         }
-
         document.addEventListener('DOMContentLoaded', function(){
             startLiveUpdate();
         })
         
-
-
         // rotate image
         const img = document.querySelector("#fan");
         let rtdeg = 0;
@@ -170,8 +181,6 @@
             // img.style.transform = 'rotate("+rtdeg"deg)';
             img.style.transform = `rotate(${rtdeg}deg)`;
         }, 10)
-
-
         </script>
         <script src="/js/nav.js"></script>    
         <script src="/js/handler.js"></script> 
