@@ -68,7 +68,7 @@ function retrieveData() {
 
 // created for later on feching to cliend-side the fan pressure
 app.get("/getFanPressure", async (req, res) => {
-    if(loggedInUser!=null){
+    if (loggedInUser != null) {
         try {
             // the last piece of data saved
             const fanPressure = await retrieveData();
@@ -76,45 +76,46 @@ app.get("/getFanPressure", async (req, res) => {
         } catch (err) {
             console.log("could not retrieve information from the latest fan pressure")
         }
-    }else{
+    } else {
         res.redirect('/');
     }
 })
 
-async function getUsername(){
+async function getUsername() {
     let username;
-    await User.findOne({_id:loggedInUser}).then(user => {
+    await User.findOne({ _id: loggedInUser }).then(user => {
         username = user.username;
-		})
-		.catch(err => {
-			console.log(err);
-		});
+    })
+        .catch(err => {
+            console.log(err);
+        });
     return username;
 }
 
 
 //userstats getting
 async function getUserstat(teacherCheck) {
-    if(await teacherCheck){ // if user is a teacher
+    if (await teacherCheck) { // if user is a teacher
         return UserStat.find({})
-        .exec();
-    }else{ // if user is a student
+            .exec();
+    } else { // if user is a student
         const usr = await getUsername();
-        return await UserStat.findOne({username: usr})
-        .exec();
+        console.log(usr)
+        return await UserStat.findOne({ username: usr })
+            .exec();
     }
 }
 
 // created for later on feching to cliend-side the fan pressure
 app.get("/getuserdata", async (req, res) => {
-    if(loggedInUser!=null){ //logged in
+    if (loggedInUser != null) { //logged in
         try {
             const userdata = await getUserstat(teacherCheck());
             res.json(userdata)
         } catch (err) {
             console.log("could not retrieve user statistics:", err)
         }
-    }else{
+    } else {
         res.redirect('/');
     }
 })
@@ -227,7 +228,7 @@ app.post("/update", async (req, res) => {
         let the_username = await getUsername();
         try {
             const info = await UserStat.find({ the_username })
-            console.log("the info from this user is ", info[0].mode)
+            // console.log("the info from this user is ", info[0].mode)
             // console.log(the_username, the_mode)
             try {
                 await UserStat.findOneAndUpdate( //add login event to usertstat array
@@ -358,16 +359,4 @@ async function teacherCheck() {
             console.log(err);
         });
     return state;
-}
-
-// checks the username of the id of that User
-async function getUsername() {
-    let username;
-    const userQuery = await User.findById(loggedInUser).then(user => {
-        username = user.username;
-    })
-        .catch(err => {
-            console.log(err);
-        });
-    return username;
 }
