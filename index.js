@@ -97,14 +97,14 @@ async function getUsername() {
 
 //userstats getting
 async function getUserstat(teacherCheck) {
-  if (await teacherCheck) {
-    // if user is a teacher
-    return UserStat.find({}).exec();
-  } else {
-    // if user is a student
-    const usr = await getUsername();
-    return await UserStat.findOne({ username: usr }).exec();
-  }
+    if (await teacherCheck) {
+        // if user is a teacher
+        return UserStat.find({}).exec();
+    } else {
+        // if user is a student
+        const usr = await getUsername();
+        return await UserStat.findOne({ username: usr }).exec();
+    }
 }
 
 // created for later on feching to cliend-side the fan pressure
@@ -315,15 +315,21 @@ app.post("/register", async (req, res) => {
 
 
 // POST login
-app.post('/', async (req, res) => {
+app.post("/", async (req, res) => {
+    const username = req.body.username
+    // const password = req.body.password
+    User.findOne({ username })
+        .then(user => {
+            if (!user) return res.status(400).json({ msg: "User not exist" }) // check username does not exist
+        })
     await myAuthorizer(req.body.username, req.body.password); //Authorize
-
     if (loggedInUser != null) {
-        res.redirect('/dashboard');
-        await UserStat.updateOne( //add login event to usertstat array
+        res.redirect("/dashboard");
+        await UserStat.updateOne(
+            //add login event to usertstat array
             { username: req.body.username },
             { $push: { logins: Date.now() } }
-        )
+        );
     }
 });
 
