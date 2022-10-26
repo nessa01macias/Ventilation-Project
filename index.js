@@ -21,9 +21,9 @@ let loggedInUser = null;
 // data
 const Data = require("./models/Data")
 const User = require('./models/User');
-const userActivity = require("./models/UserStat")
 
 const { isLoggedIn } = require("./middleware/auth")
+const setdate = require("./middleware/setdate")
 
 // assign mongoose promise library and connect to database
 mongoose.Promise = global.Promise;
@@ -113,7 +113,7 @@ client.on('message', async function (topic, message) {
     })
     // console.log(new_data)
     try {
-        // var saved_data = await new_data.save()
+        var saved_data = await new_data.save()
         // console.log(saved_data)
     } catch (err) {
         console.log(err);
@@ -122,56 +122,11 @@ client.on('message', async function (topic, message) {
 
 
 
-// gets the value of the data in certain date!
-app.post("/setdate", async (req, res) => {
-
-    let onlyDateForm = req.body.date;
-    let date_exists = false;
-
-    var theDate;
-
-    // console.log("the date input is", onlyDateForm)
-    // console.log("the dates from the db are ")
-    try {
-        const datas = await Data.find({})
-        for (let data of datas) {
-            let date = data.createdAt.toISOString()
-            const [onlyDateDB] = date.split("T")
-            console.log(onlyDateDB)
-
-            if (onlyDateForm === onlyDateDB) {
-                date_exists = true;
-                theDate = onlyDateForm;
-            }
-            if (date_exists) break;
-        }
-        console.log("does the date exist in the db? ", date_exists)
-        if (!date_exists) showError('We do not have information from that date!');
-
-        if (theDate) console.log(theDate)
-    } catch (err) {
-        console.log("Could not retrieve the data")
-    }
-
-    res.redirect("/stats")
-
-})
-
 // gets the value of the data in certain date, of the current day!
-app.get("/data", async (req, res) => {
+app.post("/date", setdate, async (req, res) => {
     // today's date
-    let isDefined = false;
-    let isoDate = new Date().toISOString()
-    let [theRealDate] = isoDate.split('T');
-
-
-    if (typeof theDate !== 'undefined') {
-        isDefined = true;
-        theRealDate = theDate;
-    }
-
-
-    // console.log("Date being used is", theRealDate, isDefined)
+    let theRealDate = res.locals.date
+    console.log("Date being used is", theRealDate)
 
     try {
         // pressure, co2, speed & temperature
@@ -194,8 +149,13 @@ app.get("/data", async (req, res) => {
                 })
             }
         }
-        if (sendData.length != 0) res.json(sendData)
-        else { res.send("<h2>I do not have data from today!<h2>") }
+        console.log(sendData)
+        if (sendData.length != 0) res.send(JSON.stringify(sendData))
+        else {
+            console.log("the array of data is empty")
+            res.redirect("/stats")
+        }
+
     } catch (err) {
         console.log(err)
     }
@@ -294,6 +254,7 @@ app.get("/stats", (req, res) => {
     } else {
         res.render("sensors_chart.ejs") // redirect to sensors_chart if logged in
     }
+    // res.render("sensors_chart.ejs")
 })
 
 

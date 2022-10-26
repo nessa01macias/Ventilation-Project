@@ -1,5 +1,8 @@
 async function gettingData() {
-    let recievedData = await fetch('http://localhost:8000/data')
+    let recievedData = await fetch('http://localhost:8000/date', {
+        method: 'POST'
+    })
+    console.log("i got the data!")
     let data_json = await recievedData.json()
     return data_json
 }
