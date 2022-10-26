@@ -4,16 +4,10 @@ const UserStatSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    login: { //date of latest login
-        type: Date,
-    },
-    mode: { //mode of last controller setting
-        type: Number
-    },
-    value: { //value of last controller setting
-        type: Number
+    logins: {
+        type: [Date],
     }
-}, { timestamps: true }); //timestamp records date of creation and latest update
+}, {timestamps:true});
 
-const UserStats = mongoose.model('userActivity', UserStatSchema)
+const UserStats = mongoose.model('UserStat', UserStatSchema)
 module.exports = UserStats;

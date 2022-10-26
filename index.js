@@ -21,9 +21,10 @@ let loggedInUser = null;
 // data
 const Data = require("./models/Data")
 const User = require('./models/User');
-
 const { isLoggedIn } = require("./middleware/auth")
+const UserStat = require('./models/Userstat');
 const setdate = require("./middleware/setdate")
+const { findById } = require('./models/Data');
 
 // assign mongoose promise library and connect to database
 mongoose.Promise = global.Promise;
@@ -56,7 +57,7 @@ app.use(function (req, res, next) {
 })
 
 // connection to the db
-mongoose.connect(process.env.USERDB_URI, () => {
+mongoose.connect(process.env.DB_URI, () => {
     console.log("connection to Goose has been established")
 }, e => console.error(e))
 
@@ -192,12 +193,20 @@ app.post("/update", (req, res) => {
 })
 
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ` + PORT);
+app.listen(process.env.PORT, () => {
+    console.log(`Server is running on port ` + process.env.PORT);
 });
 
-
 // AUTHORIZATION AND ROUTING
+
+// Route to login page
+app.get('/', (req, res) => {
+    if (loggedInUser == null) {
+        res.render('homepage.ejs'); //send to login page
+    } else {
+        res.redirect('/dashboard'); // redirect to dashboard if logged in
+    }
+});
 
 // Route to register page
 app.get('/register', (req, res) => {
@@ -212,39 +221,49 @@ app.get('/register', (req, res) => {
 app.post('/register', async (req, res) => {
     crypto.pbkdf2(req.body.password, 'salt', 10000, 64, 'sha512', (err, pbkdf2Key) => {
         if (err) throw err;
+        // TODO: check if username exists
         if (req.body.teacherCode == process.env.TEACHER_CODE) {
             User.create({ username: req.body.username, password: pbkdf2Key.toString('hex'), isTeacher: true })
         } else {
             User.create({ username: req.body.username, password: pbkdf2Key.toString('hex') })
         }
+        UserStat.create({ username: req.body.username }) //Create userstat entries in DB
         res.redirect('/')
     })
 });
 
-// Route to login page
-app.get('/', (req, res) => {
-    if (loggedInUser == null) {
-        res.render('homepage.ejs'); //send to login page
-    } else {
-        res.redirect('/dashboard'); // redirect to dashboard if logged in
-    }
-});
-
 // POST login
 app.post('/', async (req, res) => {
-    await myAuthorizer(req.body.username, req.body.password);
+    await myAuthorizer(req.body.username, req.body.password); //Authorize
 
     if (loggedInUser != null) {
         res.redirect('/dashboard');
+        await UserStat.updateOne( //add login event to usertstat array
+            { username: req.body.username },
+            { $push: { logins: Date.now() } }
+        )
+    } else {
+        req.flash('error', 'Incorrect username/password.');
     }
 });
 
+// Route to dashboard
 app.get('/dashboard', (req, res) => {
-    // console.log(loggedInUser);
     if (loggedInUser == null) {
         res.redirect('/'); //send to login page
     } else {
         res.render('dashboard.ejs'); // redirect to dashboard if logged in
+    }
+});
+
+// Go to user statistics page
+app.get('/userstats', async (req, res) => {
+    if (loggedInUser == null) {
+        res.redirect('/'); // send to login page
+    } else if (await teacherCheck(loggedInUser)) { // user is a teacher
+        res.render('userstats_teacher.ejs');
+    } else { // user is a student
+        res.render('userstats_student.ejs');
     }
 });
 
@@ -254,20 +273,17 @@ app.get("/stats", (req, res) => {
     } else {
         res.render("sensors_chart.ejs") // redirect to sensors_chart if logged in
     }
-    // res.render("sensors_chart.ejs")
-})
+});
 
-
+// Route to sensor data
 app.get('/logout', (req, res) => {
     loggedInUser = null;
     res.redirect('/'); //send to login page
 });
 
-//authorizer
+// Authorizer
 async function myAuthorizer(username, password) {
     const key = crypto.pbkdf2Sync(password, 'salt', 10000, 64, 'sha512');
-
-    console.log("to be authed: " + key.toString('hex'));
 
     const userQuery = await User.findOne({ username: username, password: key.toString('hex') }).then(user => {
         if (user) {
@@ -280,4 +296,16 @@ async function myAuthorizer(username, password) {
         .catch(err => {
             loggedInUser = null;
         });
+}
+
+// checks if logged in user is a teacher or not
+async function teacherCheck(userid) {
+    let state;
+    const userQuery = await User.findById(userid).then(user => {
+        state = user.isTeacher;
+    })
+        .catch(err => {
+            console.log(err);
+        });
+    return state;
 }
