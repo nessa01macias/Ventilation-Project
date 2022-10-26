@@ -67,14 +67,14 @@
                     <div class="slidercontainer" id="sliderPressureContainer">
                         <div class="mb-2">Pressure</div><br>
                         <input type="range" min="0" max="120" name="sliderPressure"  class="sliderPressure thetwoofus" id="sliderPressure">
-                        <br><p id="sliderPressureValue" style="font-size: 1.7rem;  color:rgb(59, 67, 104);"></p>
+                        <br><p id="sliderPressureValue"></p>
                         <div class="mt-1" id="displayPressure"></div>
                     </div>
 
                     <div class="slidercontainer" id="sliderSpeedContainer">
                         <div class="mb-2">Fan speed</div><br>
                         <input type="range" min="0" max="100" name="sliderSpeed"  class="sliderSpeed thetwoofus" id="sliderSpeed">
-                        <br><p id="sliderSpeedValue" style="font-size: 1.7rem; color:rgb(59, 67, 104);"></p>
+                        <br><p id="sliderSpeedValue" ></p>
                         <div class="mt-1" id="displaySpeed"></div>
                     </div>
                 </div>
@@ -141,7 +141,7 @@
         function startLiveUpdate(){
             setInterval(function (){
                 fetch('http://localhost:8000/getFanPressure').then(function(response){
-                    // console.log(response)
+                   // console.log(response)
                     return response.json()
                 }).then(function(data) {
                     var currentStatus = "auto"
