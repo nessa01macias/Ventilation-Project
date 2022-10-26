@@ -144,13 +144,25 @@ background: lightgray;
 cursor: pointer;
 }
 
+#sliderPressureValue {
+    font-size: 1.7rem;  
+    color:rgb(59, 67, 104);
+    position: relative;
+}
+
+#sliderSpeedValue {
+    font-size: 1.7rem;  
+    color:rgb(59, 67, 104);
+    position: relative;
+
+}
+
 .sliderPressure::after {
     content: '120';
     color:rgb(59, 67, 104);
     font-size: 1.7rem;
     position: absolute;
-    left: 85%;
-    top:  62%
+    left: 87%;
 }
 
 
@@ -162,7 +174,6 @@ cursor: pointer;
     font-size: 2rem;
     position: absolute;
     left: 12%;
-    top: 62%
 }
 
 
@@ -205,8 +216,7 @@ cursor: pointer;
     color:rgb(59, 67, 104);
     font-size: 1.7rem;
     position: absolute;
-    left: 85%;
-    top:  62%
+    left: 87%;
 }
 
 .mb-2{

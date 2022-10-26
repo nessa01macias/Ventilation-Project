@@ -10,7 +10,6 @@ const mongoose = require('mongoose');
 const flash = require("connect-flash")
 const methodOverride = require("method-override");
 const path = require('path');
-const LocalStrategy = require("passport-local");
 const { Server } = require("socket.io");
 const { createServer } = require("http");
 const app = express()
@@ -22,6 +21,7 @@ let loggedInUser = null;
 const Data = require("./models/Data")
 const User = require('./models/User');
 const UserStat = require('./models/Userstat');
+const setdate = require("./middleware/setdate")
 const { findById } = require('./models/Data');
 
 // assign mongoose promise library and connect to database
@@ -44,9 +44,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
-passport.use(new LocalStrategy(User.authenticate()));
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
 
 app.use(function (req, res, next) {
     res.locals.success = req.flash('success');
@@ -71,16 +68,56 @@ function retrieveData() {
 
 // created for later on feching to cliend-side the fan pressure
 app.get("/getFanPressure", async (req, res) => {
-    try {
-        // the last piece of data saved
-        const fanPressure = await retrieveData();
-        res.json(fanPressure[0])
-    } catch (err) {
-        console.log("could not retrieve information from the latest fan pressure")
+    if(loggedInUser!=null){
+        try {
+            // the last piece of data saved
+            const fanPressure = await retrieveData();
+            res.json(fanPressure[0])
+        } catch (err) {
+            console.log("could not retrieve information from the latest fan pressure")
+        }
+    }else{
+        res.redirect('/');
     }
 })
 
+async function getUsername(){
+    let username;
+    await User.findOne({_id:loggedInUser}).then(user => {
+        username = user.username;
+		})
+		.catch(err => {
+			console.log(err);
+		});
+    return username;
+}
 
+
+//userstats getting
+async function getUserstat(teacherCheck) {
+    if(await teacherCheck){ // if user is a teacher
+        return UserStat.find({})
+        .exec();
+    }else{ // if user is a student
+        const usr = await getUsername();
+        return await UserStat.findOne({username: usr})
+        .exec();
+    }
+}
+
+// created for later on feching to cliend-side the fan pressure
+app.get("/getuserdata", async (req, res) => {
+    if(loggedInUser!=null){ //logged in
+        try {
+            const userdata = await getUserstat(teacherCheck());
+            res.json(userdata)
+        } catch (err) {
+            console.log("could not retrieve user statistics:", err)
+        }
+    }else{
+        res.redirect('/');
+    }
+})
 
 // MQTT CONFIGURATION - SUBSCRIBING & SAVING THE INFO TO A DATABASE
 const addr = 'mqtt://192.168.56.1:1883';
@@ -121,56 +158,11 @@ client.on('message', async function (topic, message) {
 
 
 
-// gets the value of the data in certain date!
-app.post("/setdate", async (req, res) => {
-
-    let onlyDateForm = req.body.date;
-    let date_exists = false;
-
-    var theDate;
-
-    // console.log("the date input is", onlyDateForm)
-    // console.log("the dates from the db are ")
-    try {
-        const datas = await Data.find({})
-        for (let data of datas) {
-            let date = data.createdAt.toISOString()
-            const [onlyDateDB] = date.split("T")
-            console.log(onlyDateDB)
-
-            if (onlyDateForm === onlyDateDB) {
-                date_exists = true;
-                theDate = onlyDateForm;
-            }
-            if (date_exists) break;
-        }
-        console.log("does the date exist in the db? ", date_exists)
-        if (!date_exists) showError('We do not have information from that date!');
-
-        if (theDate) console.log(theDate)
-    } catch (err) {
-        console.log("Could not retrieve the data")
-    }
-
-    res.redirect("/stats")
-
-})
-
 // gets the value of the data in certain date, of the current day!
-app.get("/data", async (req, res) => {
+app.post("/date", setdate, async (req, res) => {
     // today's date
-    let isDefined = false;
-    let isoDate = new Date().toISOString()
-    let [theRealDate] = isoDate.split('T');
-
-
-    if (typeof theDate !== 'undefined') {
-        isDefined = true;
-        theRealDate = theDate;
-    }
-
-
-    // console.log("Date being used is", theRealDate, isDefined)
+    let theRealDate = res.locals.date
+    console.log("Date being used is", theRealDate)
 
     try {
         // pressure, co2, speed & temperature
@@ -193,8 +185,13 @@ app.get("/data", async (req, res) => {
                 })
             }
         }
-        if (sendData.length != 0) res.json(sendData)
-        else { res.send("<h2>I do not have data from today!<h2>") }
+        console.log(sendData)
+        if (sendData.length != 0) res.send(JSON.stringify(sendData))
+        else {
+            console.log("the array of data is empty")
+            res.redirect("/stats")
+        }
+
     } catch (err) {
         console.log(err)
     }
@@ -213,16 +210,33 @@ app.get("/data", async (req, res) => {
 // Recieved  `{"auto": false, "speed": 10}` from `controller/status` topic
 // Send `{"nr": 22, "speed": 10, "setpoint": 10, "pressure": 3, "auto": false, "error": false, "co2": 300, "rh": 37, "temp": 20}` to topic `controller/settings`
 
-app.post("/update", (req, res) => {
+app.post("/update", async (req, res) => {
     let information = {}
+    let the_mode;
     if ('send_mode' in req.body) {
-        // information["mode"] = "auto"
+        the_mode = "auto"
         information["auto"] = true
         information["pressure"] = req.body.sliderPressure
     } else {
-        // information["mode"] = "manual"
+        the_mode = "manual"
         information["auto"] = false
         information["speed"] = req.body.sliderSpeed
+    }
+
+    if (loggedInUser != null) {
+        let the_username = await getUsername();
+        try {
+            const info = await UserStat.find({ the_username })
+            console.log("the info from this user is ", info[0].mode)
+            // console.log(the_username, the_mode)
+            try {
+                await UserStat.findOneAndUpdate( //add login event to usertstat array
+                    { "username": the_username },
+                    { "$push": { mode: the_mode } }
+                )
+                // await user.save()
+            } catch (err) { console.log("Found the user in stats db but could not push the mode") }
+        } catch (err) { console.log("Could not find the username in the stats database") }
     }
     // console.log("we are in ", JSON.stringify(information))
     // publishing
@@ -230,7 +244,7 @@ app.post("/update", (req, res) => {
     console.log(`Send '${JSON.stringify(information)}' from topic '${default_pub_topic}'`)
 })
 
-
+// Start server
 app.listen(process.env.PORT, () => {
     console.log(`Server is running on port ` + process.env.PORT);
 });
@@ -239,11 +253,11 @@ app.listen(process.env.PORT, () => {
 
 // Route to login page
 app.get('/', (req, res) => {
-	if(loggedInUser==null){
-		res.render('homepage.ejs'); //send to login page
-	}else{
-		res.redirect('/dashboard'); // redirect to dashboard if logged in
-	}
+    if (loggedInUser == null) {
+        res.render('homepage.ejs'); //send to login page
+    } else {
+        res.redirect('/dashboard'); // redirect to dashboard if logged in
+    }
 });
 
 // Route to register page
@@ -259,49 +273,47 @@ app.get('/register', (req, res) => {
 app.post('/register', async (req, res) => {
     crypto.pbkdf2(req.body.password, 'salt', 10000, 64, 'sha512', (err, pbkdf2Key) => {
         if (err) throw err;
-        //TODO: check if username exists
+        // TODO: check if username exists
         if (req.body.teacherCode == process.env.TEACHER_CODE) {
             User.create({ username: req.body.username, password: pbkdf2Key.toString('hex'), isTeacher: true })
         } else {
             User.create({ username: req.body.username, password: pbkdf2Key.toString('hex') })
         }
-        UserStat.create({ username: req.body.username}) //Create userstat entries in DB
+        UserStat.create({ username: req.body.username }) //Create userstat entries in DB
         res.redirect('/')
     })
 });
 
 // POST login
 app.post('/', async (req, res) => {
-	await myAuthorizer(req.body.username, req.body.password); //Authorize
+    await myAuthorizer(req.body.username, req.body.password); //Authorize
 
-	if(loggedInUser!=null){
-		res.redirect('/dashboard');
+    if (loggedInUser != null) {
+        res.redirect('/dashboard');
         await UserStat.updateOne( //add login event to usertstat array
             { username: req.body.username },
             { $push: { logins: Date.now() } }
         )
-	}else{
-        req.flash('error', 'Incorrect username/password.');
     }
 });
 
 // Route to dashboard
 app.get('/dashboard', (req, res) => {
-	if(loggedInUser==null){
-		res.redirect('/'); //send to login page
-	}else{
-		res.render('dashboard.ejs'); // redirect to dashboard if logged in
-	}
+    if (loggedInUser == null) {
+        res.redirect('/'); //send to login page
+    } else {
+        res.render('dashboard.ejs'); // redirect to dashboard if logged in
+    }
 });
 
 // Go to user statistics page
 app.get('/userstats', async (req, res) => {
-	if(loggedInUser==null){
-		res.redirect('/'); // send to login page
-	}else if(await teacherCheck(loggedInUser)){ // user is a teacher
-		res.render('userstats_teacher.ejs');
-	}else{ // user is a student
-        res.render('userstats_student.ejs');
+    if (loggedInUser == null) {
+        res.redirect('/'); // send to login page
+    } else if (await teacherCheck()) { // user is a teacher
+        res.render('userstats_teacher.ejs');
+    } else { // user is a student
+        res.render('userstats_student.ejs', { loggedInUser });
     }
 });
 
@@ -320,30 +332,42 @@ app.get('/logout', (req, res) => {
 });
 
 // Authorizer
-async function myAuthorizer (username, password) {
-	const key = crypto.pbkdf2Sync(password, 'salt', 10000, 64, 'sha512');
+async function myAuthorizer(username, password) {
+    const key = crypto.pbkdf2Sync(password, 'salt', 10000, 64, 'sha512');
 
-	const userQuery = await User.findOne({ username: username, password: key.toString('hex') }).then(user => {
-		if(user) {
-			loggedInUser = user._id;
-		} else {
-			loggedInUser = null;
+    const userQuery = await User.findOne({ username: username, password: key.toString('hex') }).then(user => {
+        if (user) {
+            loggedInUser = user._id;
+        } else {
+            loggedInUser = null;
             req.flash('error', 'You must be signed in to see the content!');
-		}
-		})
-		.catch(err => {
-			loggedInUser = null;
-		});
+        }
+    })
+        .catch(err => {
+            loggedInUser = null;
+        });
 }
 
 // checks if logged in user is a teacher or not
-async function teacherCheck(userid){
+async function teacherCheck() {
     let state;
-    const userQuery = await User.findById(userid).then(user => {
+    const userQuery = await User.findById(loggedInUser).then(user => {
         state = user.isTeacher;
-		})
-		.catch(err => {
-			console.log(err);
-		});
+    })
+        .catch(err => {
+            console.log(err);
+        });
     return state;
+}
+
+// checks the username of the id of that User
+async function getUsername() {
+    let username;
+    const userQuery = await User.findById(loggedInUser).then(user => {
+        username = user.username;
+    })
+        .catch(err => {
+            console.log(err);
+        });
+    return username;
 }

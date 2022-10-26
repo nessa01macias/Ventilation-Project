@@ -6,8 +6,12 @@ const UserStatSchema = new mongoose.Schema({
     },
     logins: {
         type: [Date],
+    },
+    mode: {
+        type: [String],
+        defaults: []
     }
-}, {timestamps:true});
+}, { timestamps: true });
 
 const UserStats = mongoose.model('UserStat', UserStatSchema)
 module.exports = UserStats;
