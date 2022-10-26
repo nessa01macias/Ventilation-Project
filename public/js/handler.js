@@ -168,15 +168,6 @@ function mqtt_timeout() {
     }, mqtt_duration)
 }
 
-// Create svg animation
-// anime({
-//     targets: ".fanSvg",
-//     easing: "linear",
-//     rotate: "1turn",
-//     loop: true,
-//     duration: 1000,
-// });
-
 // Start first mqtt timeout
 
 
