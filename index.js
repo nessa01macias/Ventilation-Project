@@ -1,132 +1,126 @@
 // configure dotenv
-require("dotenv").config();
+require('dotenv').config()
 
-const express = require("express");
-const mqtt = require("mqtt");
+const express = require('express')
+const mqtt = require('mqtt');
 const bodyParser = require("body-parser");
 const passport = require("passport");
-const crypto = require("crypto");
-const mongoose = require("mongoose");
-const flash = require("connect-flash");
+const crypto = require('crypto');
+const mongoose = require('mongoose');
+const flash = require("connect-flash")
 const methodOverride = require("method-override");
-const path = require("path");
+const path = require('path');
 const { Server } = require("socket.io");
 const { createServer } = require("http");
-const app = express();
-const PORT = 8000;
+const app = express()
+const PORT = 8000
+
 
 let loggedInUser = null;
 // data
-const Data = require("./models/Data");
-const User = require("./models/User");
-const UserStat = require("./models/Userstat");
-const setdate = require("./middleware/setdate");
-const { findById } = require("./models/Data");
+const Data = require("./models/Data")
+const User = require('./models/User');
+const UserStat = require('./models/Userstat');
+const setdate = require("./middleware/setdate")
+const { findById } = require('./models/Data');
 
 // assign mongoose promise library and connect to database
 mongoose.Promise = global.Promise;
 
-// PASSPORT CONFIGURATION
-app.use(
-  require("express-session")({
+// PASSPORT CONFIGURATION 
+app.use(require("express-session")({
     secret: "'SECRET",
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: true },
-  })
-);
+    cookie: { secure: true }
+}))
 
 // // configuration
-app.use(express.static("./public"));
-app.set("view engine", "ejs");
+app.use(express.static('./public'))
+app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: false }));
-app.use(methodOverride("_method"));
+app.use(methodOverride('_method'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 
 app.use(function (req, res, next) {
-  res.locals.success = req.flash("success");
-  res.locals.error = req.flash("error");
-  next();
-});
+    res.locals.success = req.flash('success');
+    res.locals.error = req.flash('error');
+    next();
+})
 
 // connection to the db
-mongoose.connect(
-  process.env.DB_URI,
-  () => {
-    console.log("connection to Goose has been established");
-  },
-  (e) => console.error(e)
-);
+mongoose.connect(process.env.DB_URI, () => {
+    console.log("connection to Goose has been established")
+}, e => console.error(e))
 
 // Retrieve Data
 function retrieveData() {
   return Data.find({}).sort({ createdAt: -1 }).limit(10).exec();
 }
 
+
+
 // created for later on feching to cliend-side the fan pressure
 app.get("/getFanPressure", async (req, res) => {
-  if (loggedInUser != null) {
-    try {
-      // the last piece of data saved
-      const fanPressure = await retrieveData();
-      res.json(fanPressure[0]);
-    } catch (err) {
-      console.log(
-        "could not retrieve information from the latest fan pressure"
-      );
+    if(loggedInUser!=null){
+        try {
+            // the last piece of data saved
+            const fanPressure = await retrieveData();
+            res.json(fanPressure[0])
+        } catch (err) {
+            console.log("could not retrieve information from the latest fan pressure")
+        }
+    }else{
+        res.redirect('/');
     }
-  } else {
-    res.redirect("/");
-  }
-});
+})
 
-async function getUsername() {
-  let username;
-  await User.findOne({ _id: loggedInUser })
-    .then((user) => {
-      username = user.username;
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-  return username;
+async function getUsername(){
+    let username;
+    await User.findOne({_id:loggedInUser}).then(user => {
+        username = user.username;
+		})
+		.catch(err => {
+			console.log(err);
+		});
+    return username;
 }
+
 
 //userstats getting
 async function getUserstat(teacherCheck) {
-  if (await teacherCheck) {
-    // if user is a teacher
-    return UserStat.find({}).exec();
-  } else {
-    // if user is a student
-    const usr = await getUsername();
-    return await UserStat.findOne({ username: usr }).exec();
-  }
+    if(await teacherCheck){ // if user is a teacher
+        return UserStat.find({})
+        .exec();
+    }else{ // if user is a student
+        const usr = await getUsername();
+        return await UserStat.findOne({username: usr})
+        .exec();
+    }
 }
 
 // created for later on feching to cliend-side the fan pressure
 app.get("/getuserdata", async (req, res) => {
-  if (loggedInUser != null) {
-    //logged in
-    try {
-      const userdata = await getUserstat(teacherCheck());
-      res.json(userdata);
-    } catch (err) {
-      console.log("could not retrieve user statistics:", err);
+    if(loggedInUser!=null){ //logged in
+        try {
+            const userdata = await getUserstat(teacherCheck());
+            res.json(userdata)
+        } catch (err) {
+            console.log("could not retrieve user statistics:", err)
+        }
+    }else{
+        res.redirect('/');
     }
-  } else {
-    res.redirect("/");
-  }
-});
+})
 
 // MQTT CONFIGURATION - SUBSCRIBING & SAVING THE INFO TO A DATABASE
-const addr = "mqtt://192.168.56.1:1883";
+const addr = 'mqtt://192.168.56.1:1883';
 
-let default_pub_topic = "controller/settings";
-let default_sub_topic = "controller/status";
+let default_pub_topic = "controller/settings"
+let default_sub_topic = "controller/status"
 const client = mqtt.connect(addr);
 
 client.on("connect", function (err) {
@@ -223,33 +217,24 @@ app.post("/update", async (req, res) => {
     information["speed"] = req.body.sliderSpeed;
   }
 
-  if (loggedInUser != null) {
-    let the_username = await getUsername();
-    try {
-      const info = await UserStat.find({ the_username });
-      console.log("the info from this user is ", info[0].mode);
-      // console.log(the_username, the_mode)
-      try {
-        await UserStat.findOneAndUpdate(
-          //add login event to usertstat array
-          { username: the_username },
-          { $push: { mode: the_mode } }
-        );
-        // await user.save()
-      } catch (err) {
-        console.log("Found the user in stats db but could not push the mode");
-      }
-    } catch (err) {
-      console.log("Could not find the username in the stats database");
+    if (loggedInUser != null) {
+        let the_username = await getUsername();
+        try {
+            const info = await UserStat.find({ the_username })
+            // console.log("the info from this user is ", info[0].mode)
+            try {
+                await UserStat.findOneAndUpdate( //add login event to usertstat array
+                    { "username": the_username },
+                    { "$push": { mode: the_mode } }
+                )
+                // await user.save()
+            } catch (err) { console.log("Found the user in stats db but could not push the mode") }
+        } catch (err) { console.log("Could not find the username in the stats database") }
     }
-  }
-  // console.log("we are in ", JSON.stringify(information))
-  // publishing
-  client.publish(default_pub_topic, JSON.stringify(information));
-  console.log(
-    `Send '${JSON.stringify(information)}' from topic '${default_pub_topic}'`
-  );
-});
+    // publishing
+    client.publish(default_pub_topic, JSON.stringify(information));
+    console.log(`Send '${JSON.stringify(information)}' from topic '${default_pub_topic}'`)
+})
 
 // Start server
 app.listen(process.env.PORT, () => {
@@ -320,6 +305,7 @@ app.post("/register", async (req, res) => {
   );
 });
 
+
 // POST login
 app.post("/", async (req, res) => {
     const username = req.body.username
@@ -363,11 +349,11 @@ app.get("/userstats", async (req, res) => {
 });
 
 app.get("/stats", (req, res) => {
-  if (loggedInUser == null) {
-    res.redirect("/"); //send to login page
-  } else {
-    res.render("sensors_chart.ejs"); // redirect to sensors_chart if logged in
-  }
+    if (loggedInUser == null) {
+        res.redirect('/'); //send to login page
+    } else {
+        res.render("sensors_chart.ejs") // redirect to sensors_chart if logged in
+    }
 });
 
 // Route to sensor data
@@ -412,13 +398,12 @@ async function teacherCheck() {
 
 // checks the username of the id of that User
 async function getUsername() {
-  let username;
-  const userQuery = await User.findById(loggedInUser)
-    .then((user) => {
-      username = user.username;
+    let username;
+    const userQuery = await User.findById(loggedInUser).then(user => {
+        username = user.username;
     })
-    .catch((err) => {
-      console.log(err);
-    });
-  return username;
+        .catch(err => {
+            console.log(err);
+        });
+    return username;
 }

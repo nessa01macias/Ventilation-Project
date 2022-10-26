@@ -5,8 +5,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <link rel="stylesheet" href="/css/nav.css">
-    <link rel="stylesheet" href="/css/sensors.css">
+    <link rel="stylesheet" href="/css/student_stats.css">
     <title>User statistics</title>
 </head>
 <body>
@@ -44,15 +46,232 @@
 
 
     <div>
-        STUDENT PAGE
+        <h2><span id="name"></span>, your history is here</h2>
+        <h3> Since <span id="createdAt"></span> when you created your account, you have logged in <span id="times"></span> times</h3>
+
     </div> 
-
-
-
-
-
     
+    <div id="wrapper">
+        <div class="chartBox">
+            <canvas class="charts" id="myHistoChart"></canvas> 
+        </div>
+
+        <div class="chartBox2">
+            <canvas class="charts" id="myLineChart"></canvas> 
+        </div>
+    </div>
+
+    <div id="div-table">
+        <table class="table">
+            <tr>
+                <th>Day</th>
+                <th>Time</th>
+            </tr>
+        
+            <tbody id="myTable">
+                
+            </tbody>
+        </table>
+    </div>
+        
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
     <script src="/js/nav.js"></script>    
 
+
+    <script>
+
+        async function gettingData() {
+            let recievedData = await fetch("/getuserdata")
+            let data_json = await recievedData.json()
+            document.getElementById("name").innerHTML = data_json.username
+            document.getElementById("createdAt").innerHTML = data_json.createdAt.slice(0, 16)
+            document.getElementById("times").innerHTML = data_json.logins.length
+
+        return data_json
+        }
+
+        // FIRST GRAPH - HISTOGRAM FOR THE MODES
+        async function maketheHistogram(){
+            let data_json = await gettingData()
+            let times = [0,0] // [auto, manual]
+            let modes = data_json.mode
+            for (let mode of modes) {
+                if (mode === "auto") { times[0]++ }
+                else if (mode === "manual") { times[1] ++ }
+            }
+
+            // set up
+            const data_histo = {
+                labels: ['Auto', 'Manual'],
+                datasets: [{
+                    label:[ '# Auto'],
+                    data: times,
+                    backgroundColor: [
+                        'rgb(104, 156, 197, 0.3)',
+                        'rgb(156, 10, 150, 0.3)',
+                    ],
+                    borderColor: [
+                        'rgb(104, 156, 197)',
+                        'rgb(156, 10, 150)',
+                    ],
+                    borderWidth: 1
+                }] 
+            }
+            // config
+            const config_histo = {
+                type: 'bar',
+                data: data_histo,
+                options: {
+                    aspectRatio: 1,
+                    plugins: {
+                        title: {
+                            display: true,
+                            fullSize: true,
+                            text: 'How many times have you set each mode?',
+                            padding: {
+                                top: 10,
+                                bottom: 10
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            };
+            // render
+            const myHistoChart = new Chart(
+                document.getElementById('myHistoChart'),
+                config_histo
+            );
+        }
+
+        function getDates(startDate, stopDate) {
+            stopDate =new Date().toISOString().slice(0, 10)
+            console.log("startDate", startDate, "- stop date", stopDate)
+
+            var dateArray = [];
+            var currentDate = moment(startDate);
+            var stopDate = moment(stopDate);
+            while (currentDate <= stopDate) {
+                dateArray.push( moment(currentDate).format('YYYY-MM-DD') )
+                currentDate = moment(currentDate).add(1, 'days');
+            }
+            return dateArray;
+        }
+
+        function getTimesPerDates(logins, days) {
+            // console.log("calculating how many times user logged in per day in", days);
+            let times = []
+            let timesperday = 0;
+
+            for (let i=0; i<days.length; i++) {
+                // console.log("I am in the day ", days[i])
+                for (let j=0; j<logins.length; j++) {
+                    // console.log(" - In the login ", logins[j])
+                    let onlydateDB = logins[j].slice(0, 10)
+                    if (days[i] === onlydateDB) {
+                       timesperday ++;
+                       // console.log("Current times ", timesperday)
+                    }
+                }
+                times.push(timesperday)
+                timesperday = 0;
+            }
+            return times;
+        }
+
+        // SECOND GRAPH - LINE FOR THE LOGGIN TIMES
+        async function maketheLine(){
+            let data_json = await gettingData()  
+
+            let days = getDates(data_json.createdAt.slice(0, 10))
+            let times = getTimesPerDates(data_json.logins, days)
+           
+            for(let i = 0; i < days.length; i++){
+                console.log(days[i], "had", times[i], "logins")
+            }
+
+            // set up
+            const data_line = {
+                labels: days,
+                datasets: [{
+                    label: ['# of times you have logged in per day'],
+                    data: times,
+                    backgroundColor: [
+                        'rgb(59, 67, 104)'
+                    ],
+                    borderWidth: 2
+                }] 
+            }
+            // config
+            const config_line = {
+                type: 'line',
+
+                data: data_line,
+                options: {
+                    aspectRatio: 1,
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero:true
+                            }
+                        }]
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            fullSize: true,
+                            text: 'How many times do you loggin per day?',
+                            padding: {
+                                top: 10,
+                                bottom: 10
+                            }
+                        }
+                    }
+
+                },
+                plugins: [ChartDataLabels]
+            };
+            // render
+            const myLineChart = new Chart(
+                document.getElementById('myLineChart'),
+                config_line
+            );
+        }
+
+        // TABLE
+        async function maketheTable(){
+            let data_json = await gettingData()  
+            let logins = data_json.logins
+            let data = []
+            let eachLogin;
+
+            for (let i = 0; i<logins.length; i++) {
+                eachLogin = {
+                    'day': logins[i].slice(0, 10),
+                    'time': logins[i].slice(11, 19)
+                }
+                data.push(eachLogin)
+            }
+
+            // console.log(data)
+            var table = document.getElementById('myTable')
+            for (var i = 0; i < data.length; i++){
+                var row = `<tr>
+                                <td>${data[i].day}</td>
+                                <td>${data[i].time}</td>
+                         </tr>`
+                table.innerHTML += row
+            }
+        }
+
+        maketheHistogram()
+        maketheLine()
+        maketheTable()
+    </script>
 </body>
 </html>
