@@ -322,17 +322,23 @@ app.post("/register", async (req, res) => {
 
 // POST login
 app.post("/", async (req, res) => {
-  await myAuthorizer(req.body.username, req.body.password); //Authorize
+    const username = req.body.username
+    // const password = req.body.password
+    User.findOne({username})
+    .then(user => {
+        if(!user) return res.status(400).json({ msg: "User not exist" }) // check username does not exist
+    })
+    await myAuthorizer(req.body.username, req.body.password); //Authorize
+    if (loggedInUser != null) {
+      res.redirect("/dashboard");
+      await UserStat.updateOne(
+        //add login event to usertstat array
+        { username: req.body.username },
+        { $push: { logins: Date.now() } }
+      );
+    }
+  });
 
-  if (loggedInUser != null) {
-    res.redirect("/dashboard");
-    await UserStat.updateOne(
-      //add login event to usertstat array
-      { username: req.body.username },
-      { $push: { logins: Date.now() } }
-    );
-  }
-});
 
 // Route to dashboard
 app.get("/dashboard", (req, res) => {
