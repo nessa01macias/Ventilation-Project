@@ -1,60 +1,65 @@
 // configure dotenv
-require('dotenv').config()
+require("dotenv").config();
 
-const express = require('express')
-const mqtt = require('mqtt');
+const express = require("express");
+const mqtt = require("mqtt");
 const bodyParser = require("body-parser");
 const passport = require("passport");
-const crypto = require('crypto');
-const mongoose = require('mongoose');
-const flash = require("connect-flash")
+const crypto = require("crypto");
+const mongoose = require("mongoose");
+const flash = require("connect-flash");
 const methodOverride = require("method-override");
-const path = require('path');
+const path = require("path");
 const { Server } = require("socket.io");
 const { createServer } = require("http");
-const app = express()
-const PORT = 8000
-
+const app = express();
+const PORT = 8000;
 
 let loggedInUser = null;
 // data
-const Data = require("./models/Data")
-const User = require('./models/User');
-const UserStat = require('./models/Userstat');
-const setdate = require("./middleware/setdate")
-const { findById } = require('./models/Data');
+const Data = require("./models/Data");
+const User = require("./models/User");
+const UserStat = require("./models/Userstat");
+const setdate = require("./middleware/setdate");
+const { findById } = require("./models/Data");
 
 // assign mongoose promise library and connect to database
 mongoose.Promise = global.Promise;
 
-// PASSPORT CONFIGURATION 
-app.use(require("express-session")({
-    secret: "'SECRET",
-    resave: false,
-    saveUninitialized: false,
-    cookie: { secure: true }
-}))
+// PASSPORT CONFIGURATION
+app.use(
+    require("express-session")({
+        secret: "'SECRET",
+        resave: false,
+        saveUninitialized: false,
+        cookie: { secure: true },
+    })
+);
 
 // // configuration
-app.use(express.static('./public'))
-app.set('view engine', 'ejs');
+app.use(express.static("./public"));
+app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: false }));
-app.use(methodOverride('_method'));
+app.use(methodOverride("_method"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 
 app.use(function (req, res, next) {
-    res.locals.success = req.flash('success');
-    res.locals.error = req.flash('error');
+    res.locals.success = req.flash("success");
+    res.locals.error = req.flash("error");
     next();
-})
+});
 
 // connection to the db
-mongoose.connect(process.env.DB_URI, () => {
-    console.log("connection to Goose has been established")
-}, e => console.error(e))
+mongoose.connect(
+    process.env.DB_URI,
+    () => {
+        console.log("connection to Goose has been established");
+    },
+    (e) => console.error(e)
+);
 
 // Retrieve Data
 function retrieveData() {
@@ -63,8 +68,6 @@ function retrieveData() {
         .limit(10)
         .exec();
 }
-
-
 
 // created for later on feching to cliend-side the fan pressure
 app.get("/getFanPressure", async (req, res) => {
@@ -92,18 +95,16 @@ async function getUsername() {
     return username;
 }
 
-
 //userstats getting
 async function getUserstat(teacherCheck) {
-    if (await teacherCheck) { // if user is a teacher
-        return UserStat.find({})
-            .exec();
-    } else { // if user is a student
-        const usr = await getUsername();
-        console.log(usr)
-        return await UserStat.findOne({ username: usr })
-            .exec();
-    }
+  if (await teacherCheck) {
+    // if user is a teacher
+    return UserStat.find({}).exec();
+  } else {
+    // if user is a student
+    const usr = await getUsername();
+    return await UserStat.findOne({ username: usr }).exec();
+  }
 }
 
 // created for later on feching to cliend-side the fan pressure
@@ -121,10 +122,10 @@ app.get("/getuserdata", async (req, res) => {
 })
 
 // MQTT CONFIGURATION - SUBSCRIBING & SAVING THE INFO TO A DATABASE
-const addr = 'mqtt://192.168.56.1:1883';
+const addr = "mqtt://192.168.56.1:1883";
 
-let default_pub_topic = "controller/settings"
-let default_sub_topic = "controller/status"
+let default_pub_topic = "controller/settings";
+let default_sub_topic = "controller/status";
 const client = mqtt.connect(addr);
 
 client.on("connect", function (err) {
@@ -229,7 +230,6 @@ app.post("/update", async (req, res) => {
         try {
             const info = await UserStat.find({ the_username })
             // console.log("the info from this user is ", info[0].mode)
-            // console.log(the_username, the_mode)
             try {
                 await UserStat.findOneAndUpdate( //add login event to usertstat array
                     { "username": the_username },
@@ -239,7 +239,6 @@ app.post("/update", async (req, res) => {
             } catch (err) { console.log("Found the user in stats db but could not push the mode") }
         } catch (err) { console.log("Could not find the username in the stats database") }
     }
-    // console.log("we are in ", JSON.stringify(information))
     // publishing
     client.publish(default_pub_topic, JSON.stringify(information));
     console.log(`Send '${JSON.stringify(information)}' from topic '${default_pub_topic}'`)
@@ -271,19 +270,49 @@ app.get('/register', (req, res) => {
 });
 
 // POST registration
-app.post('/register', async (req, res) => {
-    crypto.pbkdf2(req.body.password, 'salt', 10000, 64, 'sha512', (err, pbkdf2Key) => {
-        if (err) throw err;
-        // TODO: check if username exists
-        if (req.body.teacherCode == process.env.TEACHER_CODE) {
-            User.create({ username: req.body.username, password: pbkdf2Key.toString('hex'), isTeacher: true })
-        } else {
-            User.create({ username: req.body.username, password: pbkdf2Key.toString('hex') })
+app.post("/register", async (req, res) => {
+    crypto.pbkdf2(
+        req.body.password,
+        "salt",
+        10000,
+        64,
+        "sha512",
+        async (err, pbkdf2Key) => {
+            if (err) throw err;
+            try {
+                if (req.body.teacherCode == process.env.TEACHER_CODE) {
+                    const response = await User.create({
+                        username: req.body.username,
+                        password: pbkdf2Key.toString("hex"),
+                        isTeacher: true,
+                    });
+                    console.log(
+                        "User with teacher role created successfully: ",
+                        response
+                    );
+                } else {
+                    const response = await User.create({
+                        username: req.body.username,
+                        password: pbkdf2Key.toString("hex"),
+                    });
+                    console.log(
+                        "User with student role created successfully: ",
+                        response
+                    );
+                }
+            } catch (error) {
+                if (error.code === 11000) {
+                    return res.json({ status: 'error', error: 'Username already in use' })
+                }
+                throw error
+            }
+            res.json({ status: 'User created successfully' })
+            UserStat.create({ username: req.body.username }); //Create userstat entries in DB
+            //res.redirect("/");
         }
-        UserStat.create({ username: req.body.username }) //Create userstat entries in DB
-        res.redirect('/')
-    })
+    );
 });
+
 
 // POST login
 app.post('/', async (req, res) => {
@@ -299,30 +328,32 @@ app.post('/', async (req, res) => {
 });
 
 // Route to dashboard
-app.get('/dashboard', (req, res) => {
+app.get("/dashboard", (req, res) => {
     if (loggedInUser == null) {
-        res.redirect('/'); //send to login page
+        res.redirect("/"); //send to login page
     } else {
-        res.render('dashboard.ejs'); // redirect to dashboard if logged in
+        res.render("dashboard.ejs"); // redirect to dashboard if logged in
     }
 });
 
 // Go to user statistics page
-app.get('/userstats', async (req, res) => {
+app.get("/userstats", async (req, res) => {
     if (loggedInUser == null) {
-        res.redirect('/'); // send to login page
-    } else if (await teacherCheck()) { // user is a teacher
-        res.render('userstats_teacher.ejs');
-    } else { // user is a student
-        res.render('userstats_student.ejs', { loggedInUser });
+        res.redirect("/"); // send to login page
+    } else if (await teacherCheck()) {
+        // user is a teacher
+        res.render("userstats_teacher.ejs");
+    } else {
+        // user is a student
+        res.render("userstats_student.ejs", { loggedInUser });
     }
 });
 
 app.get("/stats", (req, res) => {
     if (loggedInUser == null) {
-        res.redirect('/'); //send to login page
+        res.redirect("/"); //send to login page
     } else {
-        res.render("sensors_chart.ejs") // redirect to sensors_chart if logged in
+        res.render("sensors_chart.ejs"); // redirect to sensors_chart if logged in
     }
 });
 
