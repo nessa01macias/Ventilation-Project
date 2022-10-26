@@ -114,7 +114,7 @@ client.on('message', async function (topic, message) {
     })
     // console.log(new_data)
     try {
-        var saved_data = await new_data.save()
+        // var saved_data = await new_data.save()
         // console.log(saved_data)
     } catch (err) {
         console.log(err);
@@ -175,16 +175,33 @@ app.post("/date", setdate, async (req, res) => {
 // Recieved  `{"auto": false, "speed": 10}` from `controller/status` topic
 // Send `{"nr": 22, "speed": 10, "setpoint": 10, "pressure": 3, "auto": false, "error": false, "co2": 300, "rh": 37, "temp": 20}` to topic `controller/settings`
 
-app.post("/update", (req, res) => {
+app.post("/update", async (req, res) => {
     let information = {}
+    let the_mode;
     if ('send_mode' in req.body) {
-        // information["mode"] = "auto"
+        the_mode = "auto"
         information["auto"] = true
         information["pressure"] = req.body.sliderPressure
     } else {
-        // information["mode"] = "manual"
+        the_mode = "manual"
         information["auto"] = false
         information["speed"] = req.body.sliderSpeed
+    }
+
+    if (loggedInUser != null) {
+        let the_username = await getUsername(loggedInUser);
+        try {
+            const info = await UserStat.find({ the_username })
+            console.log("the info from this user is ", info[0].mode)
+            // console.log(the_username, the_mode)
+            try {
+                await UserStat.findOneAndUpdate( //add login event to usertstat array
+                    { "username": the_username },
+                    { "$push": { mode: the_mode } }
+                )
+                // await user.save()
+            } catch (err) { console.log("Found the user in stats db but could not push the mode") }
+        } catch (err) { console.log("Could not find the username in the stats database") }
     }
     // console.log("we are in ", JSON.stringify(information))
     // publishing
@@ -249,6 +266,7 @@ app.post('/', async (req, res) => {
 
 // Route to dashboard
 app.get('/dashboard', (req, res) => {
+
     if (loggedInUser == null) {
         res.redirect('/'); //send to login page
     } else {
@@ -263,7 +281,7 @@ app.get('/userstats', async (req, res) => {
     } else if (await teacherCheck(loggedInUser)) { // user is a teacher
         res.render('userstats_teacher.ejs');
     } else { // user is a student
-        res.render('userstats_student.ejs');
+        res.render('userstats_student.ejs', { loggedInUser });
     }
 });
 
@@ -308,4 +326,16 @@ async function teacherCheck(userid) {
             console.log(err);
         });
     return state;
+}
+
+// checks the username of the id of that User
+async function getUsername(userid) {
+    let username;
+    const userQuery = await User.findById(userid).then(user => {
+        username = user.username;
+    })
+        .catch(err => {
+            console.log(err);
+        });
+    return username;
 }
