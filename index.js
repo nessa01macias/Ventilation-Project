@@ -58,14 +58,14 @@ mongoose.connect(process.env.DB_URI, () => {
 
 // Retrieve Data
 function retrieveData() {
-  return Data.find({}).sort({ createdAt: -1 }).limit(10).exec();
+    return Data.find({}).sort({ createdAt: -1 }).limit(10).exec();
 }
 
 
 
 // created for later on feching to cliend-side the fan pressure
 app.get("/getFanPressure", async (req, res) => {
-    if(loggedInUser!=null){
+    if (loggedInUser != null) {
         try {
             // the last piece of data saved
             const fanPressure = await retrieveData();
@@ -73,48 +73,60 @@ app.get("/getFanPressure", async (req, res) => {
         } catch (err) {
             console.log("could not retrieve information from the latest fan pressure")
         }
-    }else{
+    } else {
         res.redirect('/');
     }
 })
 
-async function getUsername(){
+async function getUsername() {
     let username;
-    await User.findOne({_id:loggedInUser}).then(user => {
+    await User.findOne({ _id: loggedInUser }).then(user => {
         username = user.username;
-		})
-		.catch(err => {
-			console.log(err);
-		});
+    })
+        .catch(err => {
+            console.log(err);
+        });
     return username;
 }
 
 
 //userstats getting
 async function getUserstat(teacherCheck) {
-    if(await teacherCheck){ // if user is a teacher
-        return UserStat.find({})
-        .exec();
-    }else{ // if user is a student
+    if (await teacherCheck) {
+        return UserStat.find({}).exec();
+    } else { // if user is a student
         const usr = await getUsername();
-        return await UserStat.findOne({username: usr})
-        .exec();
+        return await UserStat.findOne({ username: usr })
+            .exec();
     }
 }
 
-// created for later on feching to cliend-side the fan pressure
+// created to send json information depending on teacher or student
 app.get("/getuserdata", async (req, res) => {
-    if(loggedInUser!=null){ //logged in
+    if (loggedInUser != null) { //logged in
         try {
             const userdata = await getUserstat(teacherCheck());
             res.json(userdata)
         } catch (err) {
             console.log("could not retrieve user statistics:", err)
         }
-    }else{
+    } else {
         res.redirect('/');
     }
 })
+
+// created to send a specific json information for the current user logged in
+app.get("/getmyinfo", async (req, res) => {
+    if (loggedInUser != null) { //logged in
+        const userdata = await getUserstat(false);
+        console.log(userdata)
+        res.json(userdata)
+    } else {
+        res.redirect('/');
+    }
+})
+
+
 
 // MQTT CONFIGURATION - SUBSCRIBING & SAVING THE INFO TO A DATABASE
 const addr = 'mqtt://192.168.56.1:1883';
@@ -124,71 +136,71 @@ let default_sub_topic = "controller/status"
 const client = mqtt.connect(addr);
 
 client.on("connect", function (err) {
-  client.subscribe(default_sub_topic);
-  console.log("client has subscribed succesfully");
+    client.subscribe(default_sub_topic);
+    console.log("client has subscribed succesfully");
 });
 
 client.on("message", async function (topic, message) {
-  // console.log(message)
-  var data = JSON.parse(message);
-  // console.log("data gotten is", data)
-  let new_data = new Data({
-    nr: data.nr,
-    speed: data.speed,
-    setpoint: data.setpoint,
-    pressure: data.pressure,
-    auto: data.auto,
-    error: data.error,
-    co2: data.co2,
-    rh: data.rh,
-    temperature: data.temp,
-    date: new Date().toJSON().slice(0, 10).replace(/-/g, "/"),
-  });
-  // console.log(new_data)
-  try {
-    // var saved_data = await new_data.save()
-    // console.log(saved_data)
-  } catch (err) {
-    console.log(err);
-  }
+    // console.log(message)
+    var data = JSON.parse(message);
+    // console.log("data gotten is", data)
+    let new_data = new Data({
+        nr: data.nr,
+        speed: data.speed,
+        setpoint: data.setpoint,
+        pressure: data.pressure,
+        auto: data.auto,
+        error: data.error,
+        co2: data.co2,
+        rh: data.rh,
+        temperature: data.temp,
+        date: new Date().toJSON().slice(0, 10).replace(/-/g, "/"),
+    });
+    // console.log(new_data)
+    try {
+        // var saved_data = await new_data.save()
+        // console.log(saved_data)
+    } catch (err) {
+        console.log(err);
+    }
 });
 
 // gets the value of the data in certain date, of the current day!
 app.post("/date", setdate, async (req, res) => {
-  // today's date
-  let theRealDate = res.locals.date;
-  console.log("Date being used is", theRealDate);
+    // today's date
+    let theRealDate = res.locals.date;
+    //  console.log("Date being used is", theRealDate);
 
-  try {
-    // pressure, co2, speed & temperature
-    const datas = await Data.find({});
-    const sendData = [];
-    for (let data of datas) {
-      let date = data.createdAt.toISOString();
-      // console.log(date)
-      const [onlyDateDB] = date.split("T");
-      // console.log(onlyDateDB)
-      if (theRealDate === onlyDateDB) {
-        sendData.push({
-          theRealDate: theRealDate,
-          date: date,
-          pressure: data.pressure,
-          co2: data.co2,
-          speed: data.speed,
-          temperature: data.temperature,
-          auto: data.auto,
-        });
-      }
+    try {
+        // pressure, co2, speed & temperature
+        const datas = await Data.find({});
+        const sendData = [];
+        for (let data of datas) {
+            let date = data.createdAt.toISOString();
+            // console.log(date)
+            const [onlyDateDB] = date.split("T");
+            // console.log(onlyDateDB)
+            if (theRealDate === onlyDateDB) {
+                sendData.push({
+                    theRealDate: theRealDate,
+                    date: date,
+                    pressure: data.pressure,
+                    co2: data.co2,
+                    speed: data.speed,
+                    temperature: data.temperature,
+                    auto: data.auto,
+                });
+            }
+        }
+        // console.log(sendData);
+        if (sendData.length != 0) res.send(JSON.stringify(sendData));
+        else {
+            console.log("the array of data is empty");
+            res.redirect("/stats");
+        }
+    } catch (err) {
+        console.log(err);
     }
-    console.log(sendData);
-    if (sendData.length != 0) res.send(JSON.stringify(sendData));
-    else {
-      console.log("the array of data is empty");
-      res.redirect("/stats");
-    }
-  } catch (err) {
-    console.log(err);
-  }
 });
 
 // FROM OUR PART WHEN MODE = MANUAL
@@ -205,17 +217,17 @@ app.post("/date", setdate, async (req, res) => {
 // Send `{"nr": 22, "speed": 10, "setpoint": 10, "pressure": 3, "auto": false, "error": false, "co2": 300, "rh": 37, "temp": 20}` to topic `controller/settings`
 
 app.post("/update", async (req, res) => {
-  let information = {};
-  let the_mode;
-  if ("send_mode" in req.body) {
-    the_mode = "auto";
-    information["auto"] = true;
-    information["pressure"] = req.body.sliderPressure;
-  } else {
-    the_mode = "manual";
-    information["auto"] = false;
-    information["speed"] = req.body.sliderSpeed;
-  }
+    let information = {};
+    let the_mode;
+    if ("send_mode" in req.body) {
+        the_mode = "auto";
+        information["auto"] = true;
+        information["pressure"] = req.body.sliderPressure;
+    } else {
+        the_mode = "manual";
+        information["auto"] = false;
+        information["speed"] = req.body.sliderSpeed;
+    }
 
     if (loggedInUser != null) {
         let the_username = await getUsername();
@@ -238,71 +250,71 @@ app.post("/update", async (req, res) => {
 
 // Start server
 app.listen(process.env.PORT, () => {
-  console.log(`Server is running on port ` + process.env.PORT);
+    console.log(`Server is running on port ` + process.env.PORT);
 });
 
 // AUTHORIZATION AND ROUTING
 
 // Route to login page
 app.get("/", (req, res) => {
-  if (loggedInUser == null) {
-    res.render("homepage.ejs"); //send to login page
-  } else {
-    res.redirect("/dashboard"); // redirect to dashboard if logged in
-  }
+    if (loggedInUser == null) {
+        res.render("homepage.ejs"); //send to login page
+    } else {
+        res.redirect("/dashboard"); // redirect to dashboard if logged in
+    }
 });
 
 // Route to register page
 app.get("/register", (req, res) => {
-  if (loggedInUser == null) {
-    res.render("register.ejs"); //send to register page
-  } else {
-    res.redirect("/dashboard"); // redirect to dashboard if logged in
-  }
+    if (loggedInUser == null) {
+        res.render("register.ejs"); //send to register page
+    } else {
+        res.redirect("/dashboard"); // redirect to dashboard if logged in
+    }
 });
 
 // POST registration
 app.post("/register", async (req, res) => {
-  crypto.pbkdf2(
-    req.body.password,
-    "salt",
-    10000,
-    64,
-    "sha512",
-    async (err, pbkdf2Key) => {
-      if (err) throw err;
-      try {
-        if (req.body.teacherCode == process.env.TEACHER_CODE) {
-          const response = await User.create({
-            username: req.body.username,
-            password: pbkdf2Key.toString("hex"),
-            isTeacher: true,
-          });
-          console.log(
-            "User with teacher role created successfully: ",
-            response
-          );
-        } else {
-            const response = await  User.create({
-            username: req.body.username,
-            password: pbkdf2Key.toString("hex"),
-          });
-          console.log(
-            "User with student role created successfully: ",
-            response
-          );
+    crypto.pbkdf2(
+        req.body.password,
+        "salt",
+        10000,
+        64,
+        "sha512",
+        async (err, pbkdf2Key) => {
+            if (err) throw err;
+            try {
+                if (req.body.teacherCode == process.env.TEACHER_CODE) {
+                    const response = await User.create({
+                        username: req.body.username,
+                        password: pbkdf2Key.toString("hex"),
+                        isTeacher: true,
+                    });
+                    console.log(
+                        "User with teacher role created successfully: ",
+                        response
+                    );
+                } else {
+                    const response = await User.create({
+                        username: req.body.username,
+                        password: pbkdf2Key.toString("hex"),
+                    });
+                    console.log(
+                        "User with student role created successfully: ",
+                        response
+                    );
+                }
+            } catch (error) {
+                if (error.code === 11000) {
+                    return res.json({ status: 'error', error: 'Username already in use' })
+                }
+                throw error
+            }
+            res.json({ status: 'User created successfully' })
+            UserStat.create({ username: req.body.username }); //Create userstat entries in DB
+            //res.redirect("/");
         }
-      } catch (error) {
-        if(error.code === 11000) {
-            return res.json({status: 'error', error: 'Username already in use' })
-        }
-        throw error
-      }
-      res.json({ status: 'User created successfully' })
-      UserStat.create({ username: req.body.username }); //Create userstat entries in DB
-      //res.redirect("/");
-    }
-  );
+    );
 });
 
 
@@ -310,42 +322,44 @@ app.post("/register", async (req, res) => {
 app.post("/", async (req, res) => {
     const username = req.body.username
     // const password = req.body.password
-    User.findOne({username})
-    .then(user => {
-        if(!user) return res.status(400).json({ msg: "User not exist" }) // check username does not exist
-    })
+    User.findOne({ username })
+        .then(user => {
+            if (!user) return res.status(400).json({ msg: "User not exist" }) // check username does not exist
+        })
     await myAuthorizer(req.body.username, req.body.password); //Authorize
     if (loggedInUser != null) {
-      res.redirect("/dashboard");
-      await UserStat.updateOne(
-        //add login event to usertstat array
-        { username: req.body.username },
-        { $push: { logins: Date.now() } }
-      );
+        res.redirect("/dashboard");
+        await UserStat.updateOne(
+            //add login event to usertstat array
+            { username: req.body.username },
+            { $push: { logins: Date.now() } }
+        );
     }
-  });
+});
 
 
 // Route to dashboard
 app.get("/dashboard", (req, res) => {
-  if (loggedInUser == null) {
-    res.redirect("/"); //send to login page
-  } else {
-    res.render("dashboard.ejs"); // redirect to dashboard if logged in
-  }
+    if (loggedInUser == null) {
+        res.redirect("/"); //send to login page
+    } else {
+        res.render("dashboard.ejs"); // redirect to dashboard if logged in
+    }
 });
 
 // Go to user statistics page
 app.get("/userstats", async (req, res) => {
-  if (loggedInUser == null) {
-    res.redirect("/"); // send to login page
-  } else if (await teacherCheck()) {
-    // user is a teacher
-    res.render("userstats_teacher.ejs");
-  } else {
-    // user is a student
-    res.render("userstats_student.ejs", { loggedInUser });
-  }
+    if (loggedInUser == null) {
+        res.redirect("/"); // send to login page
+    } else if (await teacherCheck()) {
+        // user is a teacher
+        const teacher = await getUserInfo()
+        res.render("userstats_teacher.ejs", { teacher });
+    } else {
+        // user is a student
+        const student = await getUserInfo()
+        res.render("userstats_student.ejs", { student });
+    }
 });
 
 app.get("/stats", (req, res) => {
@@ -358,52 +372,54 @@ app.get("/stats", (req, res) => {
 
 // Route to sensor data
 app.get("/logout", (req, res) => {
-  loggedInUser = null;
-  res.redirect("/"); //send to login page
+    loggedInUser = null;
+    res.redirect("/"); //send to login page
 });
 
 // Authorizer
 async function myAuthorizer(username, password) {
-  const key = crypto.pbkdf2Sync(password, "salt", 10000, 64, "sha512");
+    const key = crypto.pbkdf2Sync(password, "salt", 10000, 64, "sha512");
 
-  const userQuery = await User.findOne({
-    username: username,
-    password: key.toString("hex"),
-  })
-    .then((user) => {
-      if (user) {
-        loggedInUser = user._id;
-      } else {
-        loggedInUser = null;
-        req.flash("error", "You must be signed in to see the content!");
-      }
+    const userQuery = await User.findOne({
+        username: username,
+        password: key.toString("hex"),
     })
-    .catch((err) => {
-      loggedInUser = null;
-    });
+        .then((user) => {
+            if (user) {
+                loggedInUser = user._id;
+            } else {
+                loggedInUser = null;
+                req.flash("error", "You must be signed in to see the content!");
+            }
+        })
+        .catch((err) => {
+            loggedInUser = null;
+        });
 }
 
 // checks if logged in user is a teacher or not
 async function teacherCheck() {
-  let state;
-  const userQuery = await User.findById(loggedInUser)
-    .then((user) => {
-      state = user.isTeacher;
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-  return state;
-}
-
-// checks the username of the id of that User
-async function getUsername() {
-    let username;
-    const userQuery = await User.findById(loggedInUser).then(user => {
-        username = user.username;
-    })
-        .catch(err => {
+    let state;
+    const userQuery = await User.findById(loggedInUser)
+        .then((user) => {
+            state = user.isTeacher;
+        })
+        .catch((err) => {
             console.log(err);
         });
-    return username;
+    return state;
+}
+
+// returns all the user information
+async function getUserInfo() {
+    let info;
+    const username = await getUsername()
+    const userQuery = await UserStat.findOne({ username })
+        .then((user) => {
+            info = user;
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+    return info;
 }

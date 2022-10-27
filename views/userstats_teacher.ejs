@@ -5,8 +5,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
     <link rel="stylesheet" href="/css/nav.css">
-    <link rel="stylesheet" href="/css/sensors.css">
+    <link rel="stylesheet" href="/css/student_stats.css">
     <title>User statistics</title>
 </head>
 <body>
@@ -44,8 +45,37 @@
 
 
     <div>
-        TEACHER PAGE
+        <h2> <%= teacher.username %> , your history is here.</h2>
+        <h3> Since <%= teacher.createdAt %>  when you created your account, you have logged in <%=  teacher.logins.length %>  times</h3>
     </div> 
+    <h3 id ="areThereStudents"></h3>
+    
+    <div id="wrapper" style="display: block; margin-top: 3em;  ">
+        <h2>General information</h2>
+        <div class="chartBox2" style="width: 1000px; height: 570px; margin-top: 1em;            ">
+            <canvas class="charts" id="myLineChart"></canvas> 
+        </div>
+    </div>
+
+    <div id="wrapper" style="display: block; margin-top: 3em;  ">
+        <h2>Your own information</h2>
+            <div class="chartBox">
+                <canvas class="charts" id="myHistoChart"></canvas> 
+            </div>
+    </div>
+    
+    <div id="div-table">
+        <table class="table">
+            <tr>
+                <th>Day</th>
+                <th>Time</th>
+            </tr>
+        
+            <tbody id="myTable">
+                
+            </tbody>
+        </table>
+    </div>
 
 
 
@@ -53,8 +83,123 @@
 
 
 
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <script src="/js/nav.js"></script>    
+    <script src="/js/userstats.js"></script>
 
+    <script>
+        // FIRST GRAPH - LINE FOR THE LOGGIN TIMES
+
+        async function getMainData(){
+            let data_json = await gettingData()  
+            let all_data = []
+            var datasets = []
+            var main_data = {}
+
+            for(let i = 0; i<data_json.length; i++) {
+                let days = getDates(data_json[i].createdAt.slice(0, 10))
+                let times = getTimesPerDates(data_json[i].logins, days)
+                let data = {
+                    'name': data_json[i].username,
+                    'days': days,
+                    'times': times
+                }
+                all_data.push(data)
+            }
+
+            for( i = 0; i<all_data.length; i++) {
+                let color = getRandomColor()
+                datasets.push({
+                    "data": all_data[i].times,
+                    "label": all_data[i].name,
+                    "backgroundColor": color,
+                    "borderWidth": 2
+                })
+            }
+            main_data.datasets = datasets
+            main_data.labels = all_data[0].days
+            // console.log(JSON.stringify(main_data))
+            return main_data
+        }
+
+        async function makeGraph(){
+            if (areThereStudents()) {
+                let main_data = await getMainData()
+                var options = {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: false,
+                            precision: 0
+                        }
+                    }]
+                },
+                plugins: {
+                            title: {
+                                display: true,
+                                fullSize: true,
+                                text: 'How many times do each person log in per day?',
+                                padding: {
+                                    top: 10,
+                                    bottom: 10
+                                }
+                            }
+                        }
+
+                };
+
+                var myLineChart = new Chart( document.getElementById('myLineChart'), {
+                        type: 'line',
+                        data: main_data,
+                        options: options
+                    }
+                )
+            } else {
+                areThereStudents.innerHTML = "Well, seems like there are not any students yet...";
+            }
+        }
+        
+
+        async function maketheBestTable(data_json) {
+            console.log(data_json)
+            let logins = data_json.logins
+            let data = []
+            let eachLogin;
+
+            for (let i = 0; i < logins.length; i++) {
+                eachLogin = {
+                    'day': logins[i].slice(0, 10),
+                    'time': logins[i].slice(11, 19)
+                }
+                data.push(eachLogin)
+            }
+
+            console.log(data)
+            var table = document.getElementById('myTable')
+            for (var i = 0; i < data.length; i++) {
+                var row = `<tr>
+                                <td>${data[i].day}</td>
+                                <td>${data[i].time}</td>
+                        </tr>`
+                table.innerHTML += row
+            }
+        }
+
+
+        async function ownInformation(){
+            let myData = await gettingMyData();
+            // FIRST GRAPH - HISTOGRAM FOR THE MODES
+            await maketheHistogram(myData)
+            // SECOND GRAPH - LINE FOR THE LOGGIN TIMES
+            await maketheBestTable(myData)
+        }
+
+    
+    makeGraph()
+    ownInformation()
+
+    </script>
 </body>
 </html>
