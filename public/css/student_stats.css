@@ -1,168 +1,208 @@
-*{
-    text-align: center;
-    align-items: center;
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    max-width: 85em;
+* {
+  text-align: center;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  max-width: 85em;
   margin-left: auto;
   margin-right: auto;
 }
 
-
 h2 {
-    margin-top: 1em;
-    margin-bottom: 0.5em;
-    font-size: 30px;
-    text-align: center;
-    font-weight: 600;
-    background-image: linear-gradient(to left, rgb(104, 156, 197), rgb(59, 67, 104));
-    -webkit-text-stroke: 1px #422800;
-    color: transparent;
-    background-clip: text;
-    -webkit-background-clip: text;
-    max-width: 85em;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+  font-size: 30px;
+  text-align: center;
+  font-weight: 600;
+  background-image: linear-gradient(
+    to left,
+    rgb(104, 156, 197),
+    rgb(59, 67, 104)
+  );
+  -webkit-text-stroke: 1px #422800;
+  color: transparent;
+  background-clip: text;
+  -webkit-background-clip: text;
+  max-width: 85em;
   margin-left: auto;
   margin-right: auto;
 }
 
 .chartBox {
-    margin-top: 3em;
-    margin-bottom: 2em;
-    margin-right: 2em;
-    margin-left: 3em;
-    width: 400px;
-    padding:20px;
-    border-radius: 10px;
-    border: solid 3px rgb(59, 67, 104);
-    display: inline-block;
-    background: white;
-    max-width: 85em;
+  margin-top: 3em;
+  margin-bottom: 2em;
+  margin-right: 2em;
+  margin-left: 3em;
+  width: 400px;
+  height: 400px;
+  padding: 20px;
+  border-radius: 10px;
+  border: solid 3px rgb(59, 67, 104);
+  display: inline-block;
+  background: white;
+  max-width: 85em;
   margin-left: auto;
   margin-right: auto;
-  }
-  
-
-  .chartBox2 {
-    margin-top: 3em;
-    margin-bottom: 2em;
-    margin-right: 2em;
-    margin-left: 3em;
-    height: 400px;
-    width: 700px;
-    padding:20px;
-    border-radius: 10px;
-    position: relative;
-    vertical-align:top;
-    border: solid 3px rgb(59, 67, 104);
-    display: inline-block;
-    background: white;
-    max-width: 85em;
-  margin-left: auto;
-  margin-right: auto;
-  }
-  
-
-  #wrapper {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    max-width: 85em;
-  margin-left: auto;
-  margin-right: auto;
-    }
-
-  #div-table{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 3em;
-    margin-bottom: 2em;
-    margin-right: 10em;
-    margin-left: 10em;
-
 }
 
-  .table{
+.chartBox2 {
+  margin-top: 3em;
+  margin-bottom: 2em;
+  margin-right: 2em;
+  margin-left: 3em;
+  height: 400px;
+  width: 700px;
+  padding: 20px;
+  border-radius: 10px;
+  position: relative;
+  vertical-align: top;
+  border: solid 3px rgb(59, 67, 104);
+  display: inline-block;
+  background: white;
+  max-width: 85em;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 85em;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#div-table {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 3em;
+  margin-bottom: 2em;
+  margin-right: 10em;
+  margin-left: 10em;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  border: solid 3px rgb(59, 67, 104);
+  background: white;
+  max-width: 85em;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.table td,
+.table th {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  text-align: center;
+  font-size: 15px;
+  font-weight: bold;
+  max-width: 85em;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.table th {
+  background-color: rgb(59, 67, 104);
+  color: #ffffff;
+  max-width: 85em;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.table tbody tr:nth-child(even) {
+  background-color: rgb(244, 241, 255);
+  max-width: 85em;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/*responsive*/
+@media only screen and (max-width:700px) {
+  .chartBox{
+    width: 90%;
+  height: 45%;
+  padding: 20px;
+  }
+  .chartBox2{
+     width: 90%;
+  height: 45%;
+  padding: 20px;
+  }
+}
+@media only screen and (max-width:400) {
+  .chartCard{
+    width: 90%;
+  height: 45%;
+  padding: 20px;
+  }
+  .chartBox2{
+    width: 90%;
+    height: 45%;
+    padding: 20px;
+  }
+}
+@media only screen and (max-width:400) {
+  .chartCard{
+    width: 90%;
+  height: 45%;
+  padding: 20px;
+  }
+  .chartBox2{
+    width: 200%;
+    height: 200px;
+    padding: 20px;
+  }
+}
+@media (max-width: 500px) {
+  .table thead {
+    display: none;
+    max-width: 85em;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .table,
+  .table tbody,
+  .table tr,
+  .table td {
+    display: block;
     width: 100%;
-    border-collapse: collapse;
-    border: solid 3px rgb(59, 67, 104);
-    background: white;
     max-width: 85em;
-  margin-left: auto;
-  margin-right: auto;
+    margin-left: auto;
+    margin-right: auto;
   }
-  
-  .table td,.table th{
-    padding:12px 15px;
-    border:1px solid #ddd;
-    text-align: center;
-    font-size:15px;
+  .table tr {
+    margin-bottom: 15px;
+    max-width: 85em;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .table td {
+    text-align: right;
+    padding-left: 50%;
+    text-align: right;
+    position: relative;
+    max-width: 85em;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .table td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0;
+    width: 50%;
+    padding-left: 15px;
+    font-size: 15px;
     font-weight: bold;
+    text-align: left;
     max-width: 85em;
-  margin-left: auto;
-  margin-right: auto;
+    margin-left: auto;
+    margin-right: auto;
   }
-  
-  .table th{
-    background-color: rgb(59, 67, 104);
-    color:#ffffff;
-    max-width: 85em;
-  margin-left: auto;
-  margin-right: auto;
-  }
-  
-  .table tbody tr:nth-child(even){
-    background-color: rgb(244, 241, 255);
-    max-width: 85em;
-  margin-left: auto;
-  margin-right: auto;
-  }
-  
-  /*responsive*/
-  
-  @media(max-width: 500px){
-    .table thead{
-      display: none;
-      max-width: 85em;
-  margin-left: auto;
-  margin-right: auto;
-    }
-  
-    .table, .table tbody, .table tr, .table td{
-      display: block;
-      width: 100%;
-      max-width: 85em;
-  margin-left: auto;
-  margin-right: auto;
-    }
-    .table tr{
-      margin-bottom:15px;
-      max-width: 85em;
-  margin-left: auto;
-  margin-right: auto;
-    }
-    .table td{
-      text-align: right;
-      padding-left: 50%;
-      text-align: right;
-      position: relative;
-      max-width: 85em;
-  margin-left: auto;
-  margin-right: auto;
-    }
-    .table td::before{
-      content: attr(data-label);
-      position: absolute;
-      left:0;
-      width: 50%;
-      padding-left:15px;
-      font-size:15px;
-      font-weight: bold;
-      text-align: left;
-      max-width: 85em;
-  margin-left: auto;
-  margin-right: auto;
-    }
-  }
+}

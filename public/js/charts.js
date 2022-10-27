@@ -145,6 +145,7 @@ const config = {
     type: 'line',
     data: data,
     options: {
+        maintainAspectRation: false,
         aspectRatio: 1
     }
 }
