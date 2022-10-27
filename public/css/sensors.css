@@ -3,10 +3,16 @@
     align-items: center;
     margin: 0;
     padding: 0;
+    max-width: 85em;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 #datediv {
   width: 100%;
+  max-width: 85em;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 
@@ -21,6 +27,9 @@
   position:relative;
   display: flex;
   background: white;
+  max-width: 85em;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .chartCard{
@@ -28,6 +37,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  max-width: 85em;
+  margin-left: auto;
+  margin-right: auto;
 
 }
 
@@ -42,12 +54,18 @@
   position:relative;
   display: flex;
   background: white;
+  max-width: 85em;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 
 .chartCard p {
   padding: 10px;
   font-size: 50px;
+  max-width: 85em;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 
@@ -62,6 +80,9 @@ h1 {
     color: transparent;
     background-clip: text;
     -webkit-background-clip: text;
+    max-width: 85em;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 
@@ -85,6 +106,9 @@ h1 {
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
+  max-width: 85em;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .text {
@@ -93,15 +117,24 @@ h1 {
 
 .button-74:hover {
   background-color: rgb(59, 67, 104);
+  max-width: 85em;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .button-74:active {
   box-shadow: #422800 2px 2px 0 0;
   transform: translate(2px, 2px);
+  max-width: 85em;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 iframe{
   display: none;
+  max-width: 85em;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* validation message */
@@ -112,6 +145,9 @@ iframe{
   padding: 2px 13px;
   border-radius: 5px;
   margin-bottom: 10px;
+  max-width: 85em;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 
@@ -120,5 +156,8 @@ iframe{
   .button-74 {
     min-width: 120px;
     padding: 0 25px;
+    max-width: 85em;
+    margin-left: auto;
+    margin-right: auto;
   }
 }

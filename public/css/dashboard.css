@@ -1,369 +1,353 @@
-@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;500&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Rubik:wght@300;500&display=swap");
 
-*{
-    padding:0px;
-    margin:0px;
+* {
+  padding: 0px;
+  margin: 0px;
 }
 #mode {
-    padding-top: 1.5em;
+  padding-top: 1.5em;
 }
-  
 
 .text-left {
-    font-size:140%;
-    text-align: center;
+  font-size: 140%;
+  text-align: center;
 }
 
 .div1 {
-    display: inline-block;
+  display: inline-block;
 }
 
 .div2 {
-    vertical-align:top;
-    display: inline-block;
-    width:300px;
-    height:300px;
+  vertical-align: top;
+  display: inline-block;
+  width: 300px;
+  height: 300px;
 }
-
 
 .text {
-      color:white;
+    color: white;
 }
-#fan {
-    height: 300px;
-    width: 300px;
-    max-width: 85em;
-    margin-left: auto;
-    margin-right: auto;
+#fan{
+  height: 300px;
+  width: 300px;
+  max-width: 85em;
+  margin-left: auto;
+  margin-right: auto;
 }
-.information{
-    max-width: 85em;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-
-
-#mode{
-    padding-top: 3em;
-    font-family: 'Rubik', sans-serif;
-    max-width: 85em;
-    margin-left: auto;
-    margin-right: auto;
-}
-#pressure{
-    font-size: 20px;
-    font-family: 'Rubik', sans-serif;
-    max-width: 85em;
-    margin-left: auto;
-    margin-right: auto;
+.information {
+  max-width: 85em;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-#speed{
-    font-size: 20px;
-    font-family: 'Rubik', sans-serif;
-    max-width: 85em;
-    margin-left: auto;
-    margin-right: auto;
+#mode {
+  padding-top: 3em;
+  font-family: "Rubik", sans-serif;
+  max-width: 85em;
+  margin-left: auto;
+  margin-right: auto;
 }
-#co2{
-    font-size: 20px;
-    font-family: 'Rubik', sans-serif;
-    max-width: 85em;
-    margin-left: auto;
-    margin-right: auto;
+#pressure {
+  font-size: 20px;
+  font-family: "Rubik", sans-serif;
+  max-width: 85em;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-#time{
-    font-size: 20px;
-    font-family: 'Rubik', sans-serif;
-    max-width: 85em;
-    margin-left: auto;
-    margin-right: auto;
+#speed {
+  font-size: 20px;
+  font-family: "Rubik", sans-serif;
+  max-width: 85em;
+  margin-left: auto;
+  margin-right: auto;
+}
+#co2 {
+  font-size: 20px;
+  font-family: "Rubik", sans-serif;
+  max-width: 85em;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#time {
+  font-size: 20px;
+  font-family: "Rubik", sans-serif;
+  max-width: 85em;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .switch {
-    position: relative;
-    display: inline-block;
-    width: 170px;
-    height: 50px;
-    max-width: 85em;
-    margin-left: auto;
-    margin-right: auto;
+  position: relative;
+  display: inline-block;
+  width: 170px;
+  height: 50px;
+  max-width: 85em;
+  margin-left: auto;
+  margin-right: auto;
 }
-  
-.switch input {display:none;}
 
-
+.switch input {
+  display: none;
+}
 
 .slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgb(59, 67, 104);
-    -webkit-transition: .4s;
-    transition: .4s;
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgb(59, 67, 104);
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
 }
 
 .slider:before {
-position: absolute;
-content: "";
-height: 38px;
-width: 38px;
-left: 5.5px;
-bottom: 6px;
-background-color: rgb(104, 156, 197);
--webkit-transition: .43s;
-transition: .43s;
+  position: absolute;
+  content: "";
+  height: 38px;
+  width: 38px;
+  left: 5.5px;
+  bottom: 6px;
+  background-color: rgb(104, 156, 197);
+  -webkit-transition: 0.43s;
+  transition: 0.43s;
 }
 
 input:checked + .slider {
-background-color: lightgray;
+  background-color: lightgray;
 }
 
 input:focus + .slider {
-box-shadow: 0 0 1px rgb(104, 156, 197);
+  box-shadow: 0 0 1px rgb(104, 156, 197);
 }
 input:checked + .slider:before {
--webkit-transform: translateX(120px);
--ms-transform: translateX(120px);
-transform: translateX(120px);
+  -webkit-transform: translateX(120px);
+  -ms-transform: translateX(120px);
+  transform: translateX(120px);
 }
 
 /*------ ADDED CSS ---------*/
-.auto
-{
-display: none;
+.auto {
+  display: none;
 }
 /* manual */
 
-.auto, .manual
-{
-color: whitesmoke;
-position: absolute;
-transform: translate(-50%,-50%);
-top: 50%;
-left: 50%;
-font-size: 25px;
-font-family: Verdana, sans-serif;
+.auto,
+.manual {
+  color: whitesmoke;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  top: 50%;
+  left: 50%;
+  font-size: 25px;
+  font-family: Verdana, sans-serif;
 }
 
-input:checked+ .slider .auto
-{display: block;}
+input:checked + .slider .auto {
+  display: block;
+}
 
-input:checked + .slider .manual
-{display: none;}
+input:checked + .slider .manual {
+  display: none;
+}
 
 /*--------- END --------*/
 
 /* Rounded sliders */
 .slider.round {
-border-radius: 50px;
+  border-radius: 50px;
 }
 .slider.round:before {
-border-radius: 50%;}
-
-
+  border-radius: 50%;
+}
 
 /*----RangeSlider----*/
 
 .slidercontainer {
-    width: 70%;
-
+  width: 70%;
 }
 
 #twoSliders {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    max-width: 85em;
-    margin-left: auto;
-    margin-right: auto;
-  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 85em;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .slider:hover {
-opacity: 1; /* Fully shown on mouse-over */
+  opacity: 1; /* Fully shown on mouse-over */
 }
 
 /*---range-pressure-range---*/
 
 .sliderPressure {
--webkit-apperance: none;
-width: 100%;
-height: 15px;
-border-radius: 10px;
-box-shadow: 0px 1px 10px 1px black;
-background: rgb(104, 156, 197);
-outline: none;
-opacity: 0.7;
--webkit-transition: .2s;
-transition: opacity .2s;
+  -webkit-apperance: none;
+  width: 100%;
+  height: 15px;
+  border-radius: 10px;
+  box-shadow: 0px 1px 10px 1px black;
+  background: rgb(104, 156, 197);
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: 0.2s;
+  transition: opacity 0.2s;
 }
 
-.sliderPressure::-webkit-slider-thumb{
--webkit-appearance: none;
-appearance: none;
-width: 20px;
-height: 20px;
-border-radius: 50%;
-background-color: lightgray;
-cursor: pointer;
+.sliderPressure::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: lightgray;
+  cursor: pointer;
 }
 
 .sliderPressure::-moz-range-thumb {
-width: 25px;
-height: 25px;
-border-radius: 50%;
-background: lightgray;
-cursor: pointer;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: lightgray;
+  cursor: pointer;
 }
 
 #sliderPressureValue {
-    font-size: 1.7rem;  
-    color:rgb(59, 67, 104);
-    position: relative;
+  font-size: 1.7rem;
+  color: rgb(59, 67, 104);
+  position: relative;
 }
 
 #sliderSpeedValue {
-    font-size: 1.7rem;  
-    color:rgb(59, 67, 104);
-    position: relative;
-
+  font-size: 1.7rem;
+  color: rgb(59, 67, 104);
+  position: relative;
 }
 
 .sliderPressure::after {
-    content: '120';
-    color:rgb(59, 67, 104);
-    font-size: 1.7rem;
-    position: absolute;
-    left: 87%;
+  content: "120";
+  color: rgb(59, 67, 104);
+  font-size: 1.7rem;
+  position: absolute;
+  left: 87%;
 }
-
-
 
 /* --setting the '0' for the both slides*/
 .thetwoofus::before {
-    content: '0';
-    color:rgb(59, 67, 104);
-    font-size: 2rem;
-    position: absolute;
-    left: 12%;
+  content: "0";
+  color: rgb(59, 67, 104);
+  font-size: 2rem;
+  position: absolute;
+  left: 12%;
 }
-
-
-
 
 /*---range-fan-speed---*/
 .sliderSpeed {
--webkit-apperance: none;
-width: 100%;
-height: 20px;
-border-radius: 10px;
-background: lightgray;
-box-shadow: 0px 1px 10px 1px black;
-outline: none;
-opacity: 0.7;
--webkit-transition: .2s;
-transition: opacity .2s;
+  -webkit-apperance: none;
+  width: 100%;
+  height: 20px;
+  border-radius: 10px;
+  background: lightgray;
+  box-shadow: 0px 1px 10px 1px black;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: 0.2s;
+  transition: opacity 0.2s;
 }
 
-.sliderSpeed::-webkit-slider-thumb{
--webkit-appearance: none;
-appearance: none;
-width: 40px;
-height: 40px;
-border-radius: 50%;
-background-color: lightgray;
-cursor: pointer;
+.sliderSpeed::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: lightgray;
+  cursor: pointer;
 }
 
 .sliderSpeed::-moz-range-thumb {
-width: 25px;
-height: 25px;
-border-radius: 50%;
-background: lightgray;
-cursor: pointer;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: lightgray;
+  cursor: pointer;
 }
 
 .sliderSpeed::after {
-    content: '100';
-    color:rgb(59, 67, 104);
-    font-size: 1.7rem;
-    position: absolute;
-    left: 87%;
+  content: "100";
+  color: rgb(59, 67, 104);
+  font-size: 1.7rem;
+  position: absolute;
+  left: 87%;
 }
 
-.mb-2{
-    font-size:2rem;
-    font-family: 'Rubik', sans-serif;
-    max-width: 85em;
-    margin-left: auto;
-    margin-right: auto;
+.mb-2 {
+  font-size: 2rem;
+  font-family: "Rubik", sans-serif;
+  max-width: 85em;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .mt-1 {
-    font-size:2rem;
-    font-family: 'Rubik', sans-serif;
-    max-width: 85em;
-    margin-left: auto;
-    margin-right: auto;
+  font-size: 2rem;
+  font-family: "Rubik", sans-serif;
+  max-width: 85em;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .text-left {
-    font-size:140%;
-    text-align: center;
-    font-family: 'Rubik', sans-serif;
-    max-width: 85em;
-    margin-left: auto;
-    margin-right: auto;
+  font-size: 140%;
+  text-align: center;
+  font-family: "Rubik", sans-serif;
+  max-width: 85em;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 #divbutton {
-    margin-top: 3em;
-    margin-bottom: 3em;
+  margin-top: 3em;
+  margin-bottom: 3em;
 }
 
 #mybutton {
-    background-color: rgb(104, 134, 197);
-    border: 2px solid #422800;
-    border-radius: 30px;
-    color: #422800;
-    cursor: pointer;
-    display: inline-block;
-    font-weight: 600;
-    font-size: 18px;
-    padding: 0 18px;
-    line-height: 40px;
-    text-align: center;
-    text-decoration: none;
-    user-select: none;
-    -webkit-user-select: none;
-    touch-action: manipulation;
-    max-width: 85em;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  
+  background-color: rgb(104, 134, 197);
+  border: 2px solid #422800;
+  border-radius: 30px;
+  color: #422800;
+  cursor: pointer;
+  display: inline-block;
+  font-weight: 600;
+  font-size: 18px;
+  padding: 0 18px;
+  line-height: 40px;
+  text-align: center;
+  text-decoration: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  max-width: 85em;
+  margin-left: auto;
+  margin-right: auto;
+}
 
+.text {
+  color: white;
+}
 
+#mybutton:hover {
+  background-color: rgb(59, 67, 104);
+  max-width: 85em;
+  margin-left: auto;
+  margin-right: auto;
+}
 
-  .text {
-      color:white;
-  }
-  
-  #mybutton:hover {
-    background-color: rgb(59, 67, 104);
-     max-width: 85em;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  
-  #mybutton:active {
-    box-shadow: #422800 2px 2px 0 0;
-    transform: translate(2px, 2px);
-  }
-  
+#mybutton:active {
+  box-shadow: #422800 2px 2px 0 0;
+  transform: translate(2px, 2px);
+}
