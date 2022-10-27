@@ -1,18 +1,33 @@
 
+/**
+ * @function  gettingData
+ * @description fetches the data to display in users information page from /getuserdata. if the user making the request
+ *  is a student, it returns just their information. if it is a teacher, it returns everyone's information.
+ * @return {object} users information / one user information
+ **/
 async function gettingData() {
     let recievedData = await fetch("/getuserdata")
     let data_json = await recievedData.json()
     return data_json
 }
 
-
+/**
+ * @function gettingMyData
+ * @description fetches the data of an specific user from /getmyinfo. Made to be able to retrieve the teacher information.
+ * @return {object} one user information 
+ **/
 async function gettingMyData() {
     let recievedData = await fetch("/getmyinfo")
     let data_json = await recievedData.json()
     return data_json
 }
 
-
+/**
+ * @function areThereStudent
+ * @description checks if there exists any students so the teacher gets displayed only their own information if false, 
+ * of everyone's information if true
+ * @return {boolean} false = no students, true = yes there are students
+ **/
 async function areThereStudents() {
     let students = await gettingData()
     if (students.length == 0) {
@@ -22,6 +37,13 @@ async function areThereStudents() {
     }
 }
 
+/**
+ * @function getDates
+ * @description function created to display the days in the x axis of the graph in user's information in teachers page.
+ * it gets the amount of days between two dates, and which ones those are. Usually the start date is set depending on the needs of the 
+ * length of the graph, and the stop date is the current date in time that the person has logged in.
+ * @return {Array} contains an array of the days contained between two days
+ **/
 function getDates(startDate, stopDate) {
     startDate = "2022-10-23";
     stopDate = new Date().toISOString().slice(0, 10)
@@ -37,28 +59,37 @@ function getDates(startDate, stopDate) {
     return dateArray;
 }
 
+/**
+ * @function  getTimesPerDates
+ * @parameter {Array, Array}  logins is an array that contains how many times the user has logged in the plataform, and 
+ * days is an array that checks in which days we will check if user has logged in
+ * @description function made for calculating how many times an specific user logged in one certain day. 
+ * example: [10,7] in [10/26/2022, 10/27/2022] which means that user logged in 10 times in the first date and 7 times in the second.
+ * @return {object} returns the amout of times user logged in in a date
+ **/
 function getTimesPerDates(logins, days) {
-    // console.log("calculating how many times user logged in per day in", days);
     let times = []
     let timesperday = 0;
 
-    for (let i = 0; i < days.length; i++) {
-        //console.log("I am in the day ", days[i])
-        for (let j = 0; j < logins.length; j++) {
-            //console.log(" - In the login ", logins[j])
+    for (let i = 0; i < days.length; i++) {  //console.log("I am in the day ", days[i])
+        for (let j = 0; j < logins.length; j++) { //console.log(" - In the login ", logins[j])
             let onlydateDB = logins[j].slice(0, 10)
             if (days[i] === onlydateDB) {
-                timesperday++;
-                // console.log("Current times ", timesperday)
+                timesperday++;  // console.log("Current times ", timesperday)
             }
         }
-        times.push(timesperday)
-        // console.log("in day ", days[i], "this amount of times in this user", times)
+        times.push(timesperday)  // console.log("in day ", days[i], "this amount of times in this user", times)
         timesperday = 0;
     }
     return times;
 }
 
+/**
+ * @function getRandomColor
+ * @description generates a random color for drawing the lines of the student's log in times in order to display
+ * them in the teacher's tracking page
+ * @return {String} returns a random color
+ **/
 function getRandomColor() {
     var letters = '0123456789ABCDEF';
     var color = '#';
@@ -69,6 +100,12 @@ function getRandomColor() {
 }
 
 
+/**
+ * @function maketheHistogram
+ * @parameter {Object} 
+ * @description creates a histogram depending on the data input. it fills the variable in the html "MyHistoChart"
+ * @return {None} 
+ **/
 async function maketheHistogram(data_json) {
 
     let times = [0, 0] // [auto, manual]
@@ -124,14 +161,21 @@ async function maketheHistogram(data_json) {
 }
 
 
+/**
+ * @function maketheLine
+ * @parameter {Object} 
+ * @description gets the dates for the X axis, the times an user logged in per day for the Y axis, and creates a Line Chart
+ * depending on the data input. it fills the variable in the html "myLineChart"
+ * @return {None} 
+ **/
 async function maketheLine(data_json) {
 
     let days = getDates()
     let times = getTimesPerDates(data_json.logins, days)
 
-    for (let i = 0; i < days.length; i++) {
-        console.log(days[i], "had", times[i], "logins")
-    }
+    // for (let i = 0; i < days.length; i++) {
+    //     console.log(days[i], "had", times[i], "logins")
+    // }
 
     // set up
     const data_line = {
@@ -183,9 +227,15 @@ async function maketheLine(data_json) {
     );
 }
 
+/**
+ * @function maketheTable
+ * @parameter {Object} 
+ * @description creates a table depending on the data input. it fills the variable in the html "myTable"
+ * @return {None} 
+ **/
 
 async function maketheTable(data_json) {
-    console.log(data_json)
+
     let logins = data_json.logins
     let data = []
     let eachLogin;
@@ -198,7 +248,7 @@ async function maketheTable(data_json) {
         data.push(eachLogin)
     }
 
-    console.log(data)
+    // console.log(data)
     var table = document.getElementById('myTable')
     for (var i = 0; i < data.length; i++) {
         var row = `<tr>

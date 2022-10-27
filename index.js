@@ -10,8 +10,6 @@ const mongoose = require('mongoose');
 const flash = require("connect-flash")
 const methodOverride = require("method-override");
 const path = require('path');
-const { Server } = require("socket.io");
-const { createServer } = require("http");
 const app = express()
 const PORT = 8000
 

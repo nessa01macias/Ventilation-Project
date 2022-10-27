@@ -1,25 +1,43 @@
+
+/**
+ * @function  gettingData
+ * @description fetches the information from the sensors (/date) to display it in sensors information page. 
+ * /date is a POST request as the route is also used to recieve the form information from the calendar input.
+ * @return {object} information from the sensors
+ **/
 async function gettingData() {
     let recievedData = await fetch('http://localhost:8000/date', {
         method: 'POST'
     })
-    console.log("i got the data!")
+    // console.log("i got the data!")
     let data_json = await recievedData.json()
     return data_json
 }
 
+/**
+ * @function  gettingLastData
+ * @description fetches the last information from the sensors (/date) to display it in dashboard page and for the pressure,
+ * co2, speed and temperature graphs. 
+ * @return {object} last information saved from the sensors database
+ **/
 async function gettingLastData() {
     let recievedData = await fetch('http://localhost:8000/getFanPressure')
     let data_json = await recievedData.json()
     return data_json
 }
 
-// Fetch Block for fetching the data from the sensors
+
+/**
+ * @function  updateCharts
+ * @description Updates all the charts of the sensors page by fetching the information from the API's, specifically, the new data 
+ * being published by the mqtt every couple of seconds. data cleaning is also performed as the graphs need the data to be split into arrays.
+ * @return {None} 
+ **/
 function updateCharts() {
     setInterval(function () {
         async function fetchData() {
-            // pressure, co2, speed & temperature
-            let data_json = await gettingData()
-            // console.log(data_json, data_json[0].theRealDate)
+            // recieved: pressure, co2, speed & temperature
+            let data_json = await gettingData() // console.log(data_json, data_json[0].theRealDate)
             document.getElementById("theRealDate").innerHTML = data_json[0].theRealDate
 
             let pressure = []
@@ -38,13 +56,11 @@ function updateCharts() {
                 speed.push(data['speed'])
                 temperature.push(data['temperature'])
                 labels.push(data['date'])
-
                 if (data.auto) {
                     auto = auto + 1
                 } else if (!data.auto) {
                     manual = manual + 1
                 }
-
             }
             // console.log([labels, pressure, co2, speed, temperature])
             datapoints = [[labels, pressure, co2, speed, temperature], [auto, manual], [last_data_json.pressure, last_data_json.co2, last_data_json.speed, last_data_json.temperature]]
@@ -142,7 +158,6 @@ const myChart = new Chart(
 
 // SECOND CHART
 
-// set up
 const data_pie = {
     labels: ['Auto', 'Manual'],
     datasets: [{
@@ -160,7 +175,6 @@ const data_pie = {
     }]
 }
 
-// config
 const config_pie = {
     type: 'bar',
     data: data_pie,
@@ -170,7 +184,6 @@ const config_pie = {
     plugins: [ChartDataLabels]
 };
 
-// render
 const myPieChart = new Chart(
     document.getElementById('myPieChart'),
     config_pie
@@ -206,13 +219,13 @@ const config_pressure = {
     plugins: [ChartDataLabels]
 };
 
-// render
 const myPressureChart = new Chart(
     document.getElementById('myPressureChart'),
     config_pressure
 );
 
 // CO2 CHART 
+
 const data_co2 = {
     labels: [
         'Co2'
@@ -240,7 +253,6 @@ const config_co2 = {
     plugins: [ChartDataLabels]
 };
 
-// render
 const myCo2Chart = new Chart(
     document.getElementById('myCo2Chart'),
     config_co2
@@ -248,6 +260,7 @@ const myCo2Chart = new Chart(
 
 
 // SPEED CHART
+
 const data_speed = {
     labels: [
         'Speed'
@@ -275,7 +288,6 @@ const config_speed = {
     plugins: [ChartDataLabels]
 };
 
-// render
 const mySpeedChart = new Chart(
     document.getElementById('mySpeedChart'),
     config_speed
@@ -283,6 +295,7 @@ const mySpeedChart = new Chart(
 
 
 // TEMPERATURE CHART
+
 const data_temperature = {
     labels: [
         'Temperature'
@@ -310,7 +323,6 @@ const config_temperature = {
     plugins: [ChartDataLabels]
 };
 
-// render
 const myTempatureChart = new Chart(
     document.getElementById('myTempatureChart'),
     config_temperature
