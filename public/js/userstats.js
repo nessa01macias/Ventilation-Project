@@ -23,7 +23,7 @@ async function gettingMyData() {
 }
 
 /**
- * @function areThereStudent
+ * @function areThereStudents
  * @description checks if there exists any students so the teacher gets displayed only their own information if false, 
  * of everyone's information if true
  * @return {boolean} false = no students, true = yes there are students
