@@ -85,10 +85,14 @@ app.get("/loginerror", (req, res) => {
     res.render("homepage.ejs", {message: 'Wrong password/username.'});
 })
 
+app.get("/registererror", (req, res) => {
+    res.render("register.ejs", {message: 'Username already taken.'});
+});
+
 // Route to register page if user is not logged in
 app.get("/register", (req, res) => {
     if (loggedInUser == null) {
-        res.render("register.ejs");
+        res.render("register.ejs", {message: ''});
     } else {
         res.redirect("/dashboard");
     }
@@ -98,24 +102,27 @@ app.get("/register", (req, res) => {
 app.post("/register", async (req, res) => {
     crypto.pbkdf2(req.body.password,"salt",200000,64,"sha512", async (err, pbkdf2Key) => {
         if (err) throw err;
-        if (req.body.teacherCode == process.env.TEACHER_CODE) {
-            const response = await User.create({
-                username: req.body.username,
-                password: pbkdf2Key.toString("hex"),
-                isTeacher: true,
-            });
-            console.log("User with teacher role created successfully: ", response);
-        } else {
-            const response = await User.create({
-                username: req.body.username,
-                password: pbkdf2Key.toString("hex"),
-            });
-            console.log("User with student role created successfully: ", response);
+        if(!(await checkUsername(req.body.username))){ //check if username is taken
+            if (req.body.teacherCode == process.env.TEACHER_CODE) {
+                const response = await User.create({
+                    username: req.body.username,
+                    password: pbkdf2Key.toString("hex"),
+                    isTeacher: true,
+                });
+                console.log("User with teacher role created successfully: ", response);
+            } else {
+                const response = await User.create({
+                    username: req.body.username,
+                    password: pbkdf2Key.toString("hex"),
+                });
+                console.log("User with student role created successfully: ", response);
+            }
+            UserStat.create({ username: req.body.username });
+            res.redirect("/");
+        }else{
+            res.redirect('registererror');
         }
-        UserStat.create({ username: req.body.username });
-        res.redirect("/");
-        }
-    );
+    });
 });
 
 // Route to dashboarad if user is logged in
@@ -327,6 +334,28 @@ async function myAuthorizer(username, password) {
         loggedInUser = null;
     });
 }
+
+/**
+ * @function checkUsername
+ * @description Checks whether the username is taken or not
+ * @return {object} returns if username is taken(true) or not(false)
+ **/
+ async function checkUsername(username) {
+    let taken=false;
+    await User.findOne({ username: username }).then(user => {
+        if(user){
+            console.log('user found')
+            taken=true;
+        }
+        })
+        .catch(err => {
+            console.log(err);
+        });
+
+        console.log(taken)
+    return taken;
+}
+
 
 /**
  * @function getUsername

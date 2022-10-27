@@ -50,6 +50,17 @@
             <a href="/">Go Back</a>
         </div>
     </div>
-
+    
+    <% var msg = message %>
+    <script defer>
+      var message = "<%= msg %>"
+  
+      window.setTimeout(function(){
+          if(message!=''){
+            alert(message);
+          }
+      }, 400); 
+  
+    </script>
 </body>
 </html>
