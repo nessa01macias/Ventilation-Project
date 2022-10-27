@@ -61,7 +61,7 @@ The used modules are:
 - [method-override](https://www.npmjs.com/package/method-override)
 - [express-session](https://www.npmjs.com/package/express-session)
 ## Accounts
-
+We handle account management with the help of the crypto-js module for password encryption/hashing and MongoDB for storing the account usernames and hashed passwords.
 ## Database access
 
 ## Controller connection
