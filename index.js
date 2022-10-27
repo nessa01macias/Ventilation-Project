@@ -100,7 +100,7 @@ app.get("/register", (req, res) => {
 
 // Route to create a new user in the database
 app.post("/register", async (req, res) => {
-    crypto.pbkdf2(req.body.password, "salt", 200000, 64, "sha512", async (err, pbkdf2Key) => {
+    crypto.pbkdf2(req.body.password, "salt", 10000, 64, "sha512", async (err, pbkdf2Key) => {
         if (err) throw err;
         if (!(await checkUsername(req.body.username))) { //check if username is taken
             if (req.body.teacherCode == process.env.TEACHER_CODE) {
@@ -174,7 +174,8 @@ app.listen(process.env.PORT, () => {
 // It takes the set data middleware which tells the function is the data from the calendar input exists in the database
 app.post("/date", setdate, async (req, res) => {
 
-    let theRealDate = res.locals.date;   //  console.log("Date being used is", theRealDate);
+    let theRealDate = res.locals.date;
+    console.log("Date being used is", theRealDate);
     try {
         const datas = await Data.find({}); // pressure, co2, speed & temperature
         const sendData = [];
@@ -193,8 +194,8 @@ app.post("/date", setdate, async (req, res) => {
                 });
             }
         }
-        // console.log(sendData);
-        if (sendData.length != 0) res.send(JSON.stringify(sendData));
+        console.log(sendData);
+        if (sendData.length != 0) res.json(sendData);
         else {
             console.log("the array of data is empty");
             res.redirect("/stats");
@@ -279,6 +280,7 @@ app.get("/getmyinfo", async (req, res) => {
 
 // Client subscribes and saves data into the database
 const addr = 'mqtt://192.168.56.1:1883';
+// const addr = 'mqtt://192.168.1.254:1883';
 
 let default_pub_topic = "controller/settings"
 let default_sub_topic = "controller/status"

@@ -13,9 +13,9 @@ const setDate = async function (req, res, next) {
     } else {
         [theDate] = isoDate.split('T');
     }
-    console.log("*************")
-    console.log("we have data from the form? ", date_form)
-    console.log("the date input being used is ", theDate)
+    // console.log("*************")
+    // console.log("we have data from the form? ", date_form)
+    // console.log("the date input being used is ", theDate)
     try {
         const datas = await Data.find({})
         for (let data of datas) {
@@ -25,19 +25,19 @@ const setDate = async function (req, res, next) {
             if (theDate === onlyDateDB) {
                 date_exists = true;
                 theRealDate = theDate;
-                break;
+                break;i
             }
         }
-        console.log("does the date exist in the db? ", date_exists)
-        console.log("and the date we end up using is ", theRealDate)
+        // console.log("does the date exist in the db? ", date_exists)
+        // console.log("and the date we end up using is ", theRealDate)
         if (date_exists === false) {
-            console.log('We do not have information from that date stored in the database!')
+            // console.log('We do not have information from that date stored in the database!')
             res.locals.date = "undefined"
         } else {
             res.locals.date = theRealDate
         }
     } catch (err) {
-        console.log("Could not retrieve the data")
+        // console.log("Could not retrieve the data")
         res.locals.date = "undefined"
     }
     next()
