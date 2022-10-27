@@ -60,7 +60,7 @@ mongoose.connect(process.env.DB_URI, () => {
 // Route to login page if user is not logged in, dashboard if it is logged in
 app.get("/", (req, res) => {
     if (loggedInUser == null) {
-        res.render("homepage.ejs", {message: ''});
+        res.render("homepage.ejs", { message: '' });
     } else {
         res.redirect("/dashboard");
     }
@@ -76,23 +76,23 @@ app.post("/", async (req, res) => {
             { username: req.body.username },
             { $push: { logins: Date.now() } }
         );
-    }else{
+    } else {
         res.redirect('/loginerror')
     }
 });
 
 app.get("/loginerror", (req, res) => {
-    res.render("homepage.ejs", {message: 'Wrong password/username.'});
+    res.render("homepage.ejs", { message: 'Wrong password/username.' });
 })
 
 app.get("/registererror", (req, res) => {
-    res.render("register.ejs", {message: 'Username already taken.'});
+    res.render("register.ejs", { message: 'Username already taken.' });
 });
 
 // Route to register page if user is not logged in
 app.get("/register", (req, res) => {
     if (loggedInUser == null) {
-        res.render("register.ejs", {message: ''});
+        res.render("register.ejs", { message: '' });
     } else {
         res.redirect("/dashboard");
     }
@@ -100,9 +100,9 @@ app.get("/register", (req, res) => {
 
 // Route to create a new user in the database
 app.post("/register", async (req, res) => {
-    crypto.pbkdf2(req.body.password,"salt",200000,64,"sha512", async (err, pbkdf2Key) => {
+    crypto.pbkdf2(req.body.password, "salt", 200000, 64, "sha512", async (err, pbkdf2Key) => {
         if (err) throw err;
-        if(!(await checkUsername(req.body.username))){ //check if username is taken
+        if (!(await checkUsername(req.body.username))) { //check if username is taken
             if (req.body.teacherCode == process.env.TEACHER_CODE) {
                 const response = await User.create({
                     username: req.body.username,
@@ -119,7 +119,7 @@ app.post("/register", async (req, res) => {
             }
             UserStat.create({ username: req.body.username });
             res.redirect("/");
-        }else{
+        } else {
             res.redirect('registererror');
         }
     });
@@ -320,7 +320,7 @@ client.on("message", async function (topic, message) {
  * @return {none} it sets loggedInUser as null or sets 
  **/
 async function myAuthorizer(username, password) {
-    const key = crypto.pbkdf2Sync(password, "salt", 200000, 64, "sha512");
+    const key = crypto.pbkdf2Sync(password, "salt", 10000, 64, "sha512");
     const userQuery = await User.findOne({
         username: username,
         password: key.toString("hex"),
@@ -340,19 +340,19 @@ async function myAuthorizer(username, password) {
  * @description Checks whether the username is taken or not
  * @return {object} returns if username is taken(true) or not(false)
  **/
- async function checkUsername(username) {
-    let taken=false;
+async function checkUsername(username) {
+    let taken = false;
     await User.findOne({ username: username }).then(user => {
-        if(user){
+        if (user) {
             console.log('user found')
-            taken=true;
+            taken = true;
         }
-        })
+    })
         .catch(err => {
             console.log(err);
         });
 
-        console.log(taken)
+    console.log(taken)
     return taken;
 }
 
