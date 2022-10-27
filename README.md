@@ -1,7 +1,5 @@
 # Ventilation-Project
-###### Created by Metropolia University of Applied Science students, 3rd yead, Smart IoT Systems major.
-### Web Application for ABB Ventilation Controller
-#### OVERVIEW
+#### Web Application for ABB Ventilation Controller
 
 # Contents
 - [User manual](#user-manual)
@@ -25,7 +23,6 @@ git clone https://github.com/nessa01macias/Ventilation-Project.git
 ```
 Downloading as a .zip package is available on the Github interface.
 ## Login
-
 Log in with your username and password on the localhost:PORT/ route. In case you don't have an account yet, click on the "Register now!" link.
 ## Registration
 You can register an account via the /register route. You will be required to provide a username and a password. To create a teacher/admin account, also provide the secret teacher code. This code is adjustable and changeable on the server side via a .env environment variable. You will be redirected to the login page.
@@ -63,8 +60,13 @@ The used modules are:
 - [connect-flash](https://www.npmjs.com/package/connect-flash)
 - [method-override](https://www.npmjs.com/package/method-override)
 - [express-session](https://www.npmjs.com/package/express-session)
+- [chart.js](https://www.npmjs.com/package/chartjs)
+- [ejs](https://www.npmjs.com/package/ejs)
 ## Accounts
-We handle account management with the help of the crypto-js module for password encryption/hashing and MongoDB for storing the account usernames and hashed passwords.
+We handle account management with the help of the crypto-js module for password encryption/hashing and MongoDB for storing the account usernames and hashed passwords. Upon login requests, the input password is hashed and compared to the one in the database after querying for the entry with the username. Other than username and password, the database also records whether the user is a teacher in a boolean value.
+
+![Users](https://user-images.githubusercontent.com/70892020/198275946-a433216a-2759-4ee4-b2b7-b15675ec9936.png)
+
 ## Database access
 
 ## Controller connection
