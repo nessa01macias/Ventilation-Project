@@ -1,20 +1,95 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;500&display=swap');
+
 *{
     padding:0px;
     margin:0px;
 }
-
-#fan {
-    height: 600px;
-    width: 600px;
+#mode {
+    padding-top: 1.5em;
+}
   
+
+.text-left {
+    font-size:140%;
+    text-align: center;
 }
 
+.div1 {
+    display: inline-block;
+}
+
+.div2 {
+    vertical-align:top;
+    display: inline-block;
+    width:300px;
+    height:300px;
+}
+
+
+.text {
+      color:white;
+}
+#fan {
+    height: 300px;
+    width: 300px;
+    max-width: 85em;
+    margin-left: auto;
+    margin-right: auto;
+}
+.information{
+    max-width: 85em;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+
+#mode{
+    padding-top: 3em;
+    font-family: 'Rubik', sans-serif;
+    max-width: 85em;
+    margin-left: auto;
+    margin-right: auto;
+}
+#pressure{
+    font-size: 20px;
+    font-family: 'Rubik', sans-serif;
+    max-width: 85em;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#speed{
+    font-size: 20px;
+    font-family: 'Rubik', sans-serif;
+    max-width: 85em;
+    margin-left: auto;
+    margin-right: auto;
+}
+#co2{
+    font-size: 20px;
+    font-family: 'Rubik', sans-serif;
+    max-width: 85em;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#time{
+    font-size: 20px;
+    font-family: 'Rubik', sans-serif;
+    max-width: 85em;
+    margin-left: auto;
+    margin-right: auto;
+}
 
 .switch {
     position: relative;
     display: inline-block;
     width: 170px;
     height: 50px;
+    max-width: 85em;
+    margin-left: auto;
+    margin-right: auto;
 }
   
 .switch input {display:none;}
@@ -104,6 +179,9 @@ border-radius: 50%;}
     display: flex;
     justify-content: center;
     align-items: center;
+    max-width: 85em;
+    margin-left: auto;
+    margin-right: auto;
   
 }
 
@@ -220,15 +298,28 @@ cursor: pointer;
 }
 
 .mb-2{
-    font-size:2rem
+    font-size:2rem;
+    font-family: 'Rubik', sans-serif;
+    max-width: 85em;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .mt-1 {
-    font-size:2rem
+    font-size:2rem;
+    font-family: 'Rubik', sans-serif;
+    max-width: 85em;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .text-left {
-    font-size:2rem
+    font-size:140%;
+    text-align: center;
+    font-family: 'Rubik', sans-serif;
+    max-width: 85em;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 #divbutton {
@@ -252,11 +343,12 @@ cursor: pointer;
     user-select: none;
     -webkit-user-select: none;
     touch-action: manipulation;
+    max-width: 85em;
+    margin-left: auto;
+    margin-right: auto;
   }
   
-.information {
-    margin-bottom: 10ex;
-}
+
 
 
   .text {
@@ -265,11 +357,13 @@ cursor: pointer;
   
   #mybutton:hover {
     background-color: rgb(59, 67, 104);
+     max-width: 85em;
+    margin-left: auto;
+    margin-right: auto;
   }
   
   #mybutton:active {
     box-shadow: #422800 2px 2px 0 0;
     transform: translate(2px, 2px);
   }
-  
   
