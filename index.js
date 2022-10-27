@@ -10,8 +10,9 @@ const mongoose = require('mongoose');
 const flash = require("connect-flash")
 const methodOverride = require("method-override");
 const path = require('path');
+const { Server } = require("socket.io");
+const { createServer } = require("http");
 const app = express()
-const PORT = 8000
 
 // is the user logged in
 var loggedInUser = null;
@@ -28,10 +29,9 @@ mongoose.Promise = global.Promise;
 
 // PASSPORT CONFIGURATION 
 app.use(require("express-session")({
-    secret: "'SECRET",
-    resave: false,
-    saveUninitialized: false,
-    cookie: { secure: true }
+    secret: "SECRET",
+    resave: true,
+    saveUninitialized: true,
 }))
 
 app.use(express.static('./public'))
@@ -60,21 +60,15 @@ mongoose.connect(process.env.DB_URI, () => {
 // Route to login page if user is not logged in, dashboard if it is logged in
 app.get("/", (req, res) => {
     if (loggedInUser == null) {
-        res.render("homepage.ejs");
+        res.render("homepage.ejs", {message: ''});
     } else {
         res.redirect("/dashboard");
     }
 });
 
 
-// Route to redirect the user to main dashboard if the password and username is correct
+// POST login
 app.post("/", async (req, res) => {
-    const username = req.body.username
-    // const password = req.body.password
-    User.findOne({ username })
-        .then(user => {
-            if (!user) return res.status(400).json({ msg: "User not exist" }) // check username does not exist
-        })
     await myAuthorizer(req.body.username, req.body.password); //Authorize
     if (loggedInUser != null) {
         res.redirect("/dashboard");
@@ -82,9 +76,14 @@ app.post("/", async (req, res) => {
             { username: req.body.username },
             { $push: { logins: Date.now() } }
         );
+    }else{
+        res.redirect('/loginerror')
     }
 });
 
+app.get("/loginerror", (req, res) => {
+    res.render("homepage.ejs", {message: 'Wrong password/username.'});
+})
 
 // Route to register page if user is not logged in
 app.get("/register", (req, res) => {
@@ -97,44 +96,24 @@ app.get("/register", (req, res) => {
 
 // Route to create a new user in the database
 app.post("/register", async (req, res) => {
-    crypto.pbkdf2(
-        req.body.password,
-        "salt",
-        10000,
-        64,
-        "sha512",
-        async (err, pbkdf2Key) => {
-            if (err) throw err;
-            try {
-                if (req.body.teacherCode == process.env.TEACHER_CODE) {
-                    const response = await User.create({
-                        username: req.body.username,
-                        password: pbkdf2Key.toString("hex"),
-                        isTeacher: true,
-                    });
-                    console.log(
-                        "User with teacher role created successfully: ",
-                        response
-                    );
-                } else {
-                    const response = await User.create({
-                        username: req.body.username,
-                        password: pbkdf2Key.toString("hex"),
-                    });
-                    console.log(
-                        "User with student role created successfully: ",
-                        response
-                    );
-                }
-            } catch (error) {
-                if (error.code === 11000) {
-                    return res.json({ status: 'error', error: 'Username already in use' })
-                }
-                throw error
-            }
-            res.json({ status: 'User created successfully' })
-            UserStat.create({ username: req.body.username });
-            //res.redirect("/");
+    crypto.pbkdf2(req.body.password,"salt",200000,64,"sha512", async (err, pbkdf2Key) => {
+        if (err) throw err;
+        if (req.body.teacherCode == process.env.TEACHER_CODE) {
+            const response = await User.create({
+                username: req.body.username,
+                password: pbkdf2Key.toString("hex"),
+                isTeacher: true,
+            });
+            console.log("User with teacher role created successfully: ", response);
+        } else {
+            const response = await User.create({
+                username: req.body.username,
+                password: pbkdf2Key.toString("hex"),
+            });
+            console.log("User with student role created successfully: ", response);
+        }
+        UserStat.create({ username: req.body.username });
+        res.redirect("/");
         }
     );
 });
@@ -334,7 +313,7 @@ client.on("message", async function (topic, message) {
  * @return {none} it sets loggedInUser as null or sets 
  **/
 async function myAuthorizer(username, password) {
-    const key = crypto.pbkdf2Sync(password, "salt", 10000, 64, "sha512");
+    const key = crypto.pbkdf2Sync(password, "salt", 200000, 64, "sha512");
     const userQuery = await User.findOne({
         username: username,
         password: key.toString("hex"),
@@ -405,7 +384,6 @@ async function teacherCheck() {
  * @description gets all the specific information of an user and their user tracking. logginUser /= Null
  * @return {object} returns a how many times an user logged in, what commands have the used.
  **/
-
 async function getUserInfo() {
     let info;
     const username = await getUsername()
