@@ -15,8 +15,9 @@ const { createServer } = require("http");
 const app = express()
 const PORT = 8000
 
+// is the user logged in
+var loggedInUser = null;
 
-let loggedInUser = null;
 // data
 const Data = require("./models/Data")
 const User = require('./models/User');
@@ -35,7 +36,6 @@ app.use(require("express-session")({
     cookie: { secure: true }
 }))
 
-// // configuration
 app.use(express.static('./public'))
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: false }));
@@ -51,229 +51,53 @@ app.use(function (req, res, next) {
     next();
 })
 
-// connection to the db
 mongoose.connect(process.env.DB_URI, () => {
     console.log("connection to Goose has been established")
 }, e => console.error(e))
 
-// Retrieve Data
-function retrieveData() {
-    return Data.find({}).sort({ createdAt: -1 }).limit(10).exec();
-}
 
-
-
-// created for later on feching to cliend-side the fan pressure
-app.get("/getFanPressure", async (req, res) => {
-    if (loggedInUser != null) {
-        try {
-            // the last piece of data saved
-            const fanPressure = await retrieveData();
-            res.json(fanPressure[0])
-        } catch (err) {
-            console.log("could not retrieve information from the latest fan pressure")
-        }
-    } else {
-        res.redirect('/');
-    }
-})
-
-async function getUsername() {
-    let username;
-    await User.findOne({ _id: loggedInUser }).then(user => {
-        username = user.username;
-    })
-        .catch(err => {
-            console.log(err);
-        });
-    return username;
-}
-
-
-//userstats getting
-async function getUserstat(teacherCheck) {
-    if (await teacherCheck) {
-        return UserStat.find({}).exec();
-    } else { // if user is a student
-        const usr = await getUsername();
-        return await UserStat.findOne({ username: usr })
-            .exec();
-    }
-}
-
-// created to send json information depending on teacher or student
-app.get("/getuserdata", async (req, res) => {
-    if (loggedInUser != null) { //logged in
-        try {
-            const userdata = await getUserstat(teacherCheck());
-            res.json(userdata)
-        } catch (err) {
-            console.log("could not retrieve user statistics:", err)
-        }
-    } else {
-        res.redirect('/');
-    }
-})
-
-// created to send a specific json information for the current user logged in
-app.get("/getmyinfo", async (req, res) => {
-    if (loggedInUser != null) { //logged in
-        const userdata = await getUserstat(false);
-        console.log(userdata)
-        res.json(userdata)
-    } else {
-        res.redirect('/');
-    }
-})
-
-
-
-// MQTT CONFIGURATION - SUBSCRIBING & SAVING THE INFO TO A DATABASE
-const addr = 'mqtt://192.168.56.1:1883';
-
-let default_pub_topic = "controller/settings"
-let default_sub_topic = "controller/status"
-const client = mqtt.connect(addr);
-
-client.on("connect", function (err) {
-    client.subscribe(default_sub_topic);
-    console.log("client has subscribed succesfully");
-});
-
-client.on("message", async function (topic, message) {
-    // console.log(message)
-    var data = JSON.parse(message);
-    // console.log("data gotten is", data)
-    let new_data = new Data({
-        nr: data.nr,
-        speed: data.speed,
-        setpoint: data.setpoint,
-        pressure: data.pressure,
-        auto: data.auto,
-        error: data.error,
-        co2: data.co2,
-        rh: data.rh,
-        temperature: data.temp,
-        date: new Date().toJSON().slice(0, 10).replace(/-/g, "/"),
-    });
-    // console.log(new_data)
-    try {
-        // var saved_data = await new_data.save()
-        // console.log(saved_data)
-    } catch (err) {
-        console.log(err);
-    }
-});
-
-// gets the value of the data in certain date, of the current day!
-app.post("/date", setdate, async (req, res) => {
-    // today's date
-    let theRealDate = res.locals.date;
-    //  console.log("Date being used is", theRealDate);
-
-    try {
-        // pressure, co2, speed & temperature
-        const datas = await Data.find({});
-        const sendData = [];
-        for (let data of datas) {
-            let date = data.createdAt.toISOString();
-            // console.log(date)
-            const [onlyDateDB] = date.split("T");
-            // console.log(onlyDateDB)
-            if (theRealDate === onlyDateDB) {
-                sendData.push({
-                    theRealDate: theRealDate,
-                    date: date,
-                    pressure: data.pressure,
-                    co2: data.co2,
-                    speed: data.speed,
-                    temperature: data.temperature,
-                    auto: data.auto,
-                });
-            }
-        }
-        // console.log(sendData);
-        if (sendData.length != 0) res.send(JSON.stringify(sendData));
-        else {
-            console.log("the array of data is empty");
-            res.redirect("/stats");
-        }
-    } catch (err) {
-        console.log(err);
-    }
-});
-
-// FROM OUR PART WHEN MODE = MANUAL
-
-// Send `{"auto": true, "pressure": 10}` to topic `controller/status`
-// FROM THE EMBEDDED'S PART
-// Recieved `{"auto": true, "pressure": 10}` from topic `controller/status`
-// Send `{"nr": 40, "speed": 13, "setpoint": 10, "pressure": 3, "auto": true, "error": false, "co2": 300, "rh": 37, "temp": 20}` to topic `controller/settings`
-
-// FROM OUR PART WHEN MODE = AUTO
-// Send: `{"auto": false, "speed": 10}` from `controller/status` topic
-// FROM THE EMBEDDED'S PART
-// Recieved  `{"auto": false, "speed": 10}` from `controller/status` topic
-// Send `{"nr": 22, "speed": 10, "setpoint": 10, "pressure": 3, "auto": false, "error": false, "co2": 300, "rh": 37, "temp": 20}` to topic `controller/settings`
-
-app.post("/update", async (req, res) => {
-    let information = {};
-    let the_mode;
-    if ("send_mode" in req.body) {
-        the_mode = "auto";
-        information["auto"] = true;
-        information["pressure"] = req.body.sliderPressure;
-    } else {
-        the_mode = "manual";
-        information["auto"] = false;
-        information["speed"] = req.body.sliderSpeed;
-    }
-
-    if (loggedInUser != null) {
-        let the_username = await getUsername();
-        try {
-            const info = await UserStat.find({ the_username })
-            // console.log("the info from this user is ", info[0].mode)
-            try {
-                await UserStat.findOneAndUpdate( //add login event to usertstat array
-                    { "username": the_username },
-                    { "$push": { mode: the_mode } }
-                )
-                // await user.save()
-            } catch (err) { console.log("Found the user in stats db but could not push the mode") }
-        } catch (err) { console.log("Could not find the username in the stats database") }
-    }
-    // publishing
-    client.publish(default_pub_topic, JSON.stringify(information));
-    console.log(`Send '${JSON.stringify(information)}' from topic '${default_pub_topic}'`)
-})
-
-// Start server
-app.listen(process.env.PORT, () => {
-    console.log(`Server is running on port ` + process.env.PORT);
-});
 
 // AUTHORIZATION AND ROUTING
 
-// Route to login page
+// Route to login page if user is not logged in, dashboard if it is logged in
 app.get("/", (req, res) => {
     if (loggedInUser == null) {
-        res.render("homepage.ejs"); //send to login page
+        res.render("homepage.ejs");
     } else {
-        res.redirect("/dashboard"); // redirect to dashboard if logged in
+        res.redirect("/dashboard");
     }
 });
 
-// Route to register page
+
+// Route to redirect the user to main dashboard if the password and username is correct
+app.post("/", async (req, res) => {
+    const username = req.body.username
+    // const password = req.body.password
+    User.findOne({ username })
+        .then(user => {
+            if (!user) return res.status(400).json({ msg: "User not exist" }) // check username does not exist
+        })
+    await myAuthorizer(req.body.username, req.body.password); //Authorize
+    if (loggedInUser != null) {
+        res.redirect("/dashboard");
+        await UserStat.updateOne(
+            { username: req.body.username },
+            { $push: { logins: Date.now() } }
+        );
+    }
+});
+
+
+// Route to register page if user is not logged in
 app.get("/register", (req, res) => {
     if (loggedInUser == null) {
-        res.render("register.ejs"); //send to register page
+        res.render("register.ejs");
     } else {
-        res.redirect("/dashboard"); // redirect to dashboard if logged in
+        res.redirect("/dashboard");
     }
 });
 
-// POST registration
+// Route to create a new user in the database
 app.post("/register", async (req, res) => {
     crypto.pbkdf2(
         req.body.password,
@@ -311,93 +135,260 @@ app.post("/register", async (req, res) => {
                 throw error
             }
             res.json({ status: 'User created successfully' })
-            UserStat.create({ username: req.body.username }); //Create userstat entries in DB
+            UserStat.create({ username: req.body.username });
             //res.redirect("/");
         }
     );
 });
 
-
-// POST login
-app.post("/", async (req, res) => {
-    const username = req.body.username
-    // const password = req.body.password
-    User.findOne({ username })
-        .then(user => {
-            if (!user) return res.status(400).json({ msg: "User not exist" }) // check username does not exist
-        })
-    await myAuthorizer(req.body.username, req.body.password); //Authorize
-    if (loggedInUser != null) {
-        res.redirect("/dashboard");
-        await UserStat.updateOne(
-            //add login event to usertstat array
-            { username: req.body.username },
-            { $push: { logins: Date.now() } }
-        );
-    }
-});
-
-
-// Route to dashboard
+// Route to dashboarad if user is logged in
 app.get("/dashboard", (req, res) => {
     if (loggedInUser == null) {
-        res.redirect("/"); //send to login page
+        res.redirect("/");
     } else {
-        res.render("dashboard.ejs"); // redirect to dashboard if logged in
+        res.render("dashboard.ejs");
     }
 });
 
-// Go to user statistics page
+// Route to send to teacher users stadistics or students stadistics
 app.get("/userstats", async (req, res) => {
     if (loggedInUser == null) {
-        res.redirect("/"); // send to login page
+        res.redirect("/");
     } else if (await teacherCheck()) {
-        // user is a teacher
         const teacher = await getUserInfo()
         res.render("userstats_teacher.ejs", { teacher });
     } else {
-        // user is a student
         const student = await getUserInfo()
         res.render("userstats_student.ejs", { student });
     }
 });
 
+// Route to send to sensors_page if user is logged in.
 app.get("/stats", (req, res) => {
     if (loggedInUser == null) {
-        res.redirect('/'); //send to login page
+        res.redirect('/');
     } else {
-        res.render("sensors_chart.ejs") // redirect to sensors_chart if logged in
+        res.render("sensors_chart.ejs")
     }
 });
 
-// Route to sensor data
+// Route to log out
 app.get("/logout", (req, res) => {
     loggedInUser = null;
-    res.redirect("/"); //send to login page
+    res.redirect("/");
 });
 
-// Authorizer
+// Start server
+app.listen(process.env.PORT, () => {
+    console.log(`Server is running on port ` + process.env.PORT);
+});
+
+
+// API ROUTES FOR FETCHING INFORMATION
+
+// Route that gets the value of the data of certain date or in the current day.
+// It takes the set data middleware which tells the function is the data from the calendar input exists in the database
+app.post("/date", setdate, async (req, res) => {
+
+    let theRealDate = res.locals.date;   //  console.log("Date being used is", theRealDate);
+    try {
+        const datas = await Data.find({}); // pressure, co2, speed & temperature
+        const sendData = [];
+        for (let data of datas) {
+            let date = data.createdAt.toISOString();  // console.log(date)
+            const [onlyDateDB] = date.split("T");   // console.log(onlyDateDB)
+            if (theRealDate === onlyDateDB) {
+                sendData.push({
+                    theRealDate: theRealDate,
+                    date: date,
+                    pressure: data.pressure,
+                    co2: data.co2,
+                    speed: data.speed,
+                    temperature: data.temperature,
+                    auto: data.auto,
+                });
+            }
+        }
+        // console.log(sendData);
+        if (sendData.length != 0) res.send(JSON.stringify(sendData));
+        else {
+            console.log("the array of data is empty");
+            res.redirect("/stats");
+        }
+    } catch (err) {
+        console.log(err);
+    }
+});
+
+// Route to publish data to MQTT when user changes the mode (auto or manual) in dashboard
+app.post("/update", async (req, res) => {
+    let information = {};
+    let the_mode;
+    if ("send_mode" in req.body) {
+        the_mode = "auto";
+        information["auto"] = true;
+        information["pressure"] = req.body.sliderPressure;
+    } else {
+        the_mode = "manual";
+        information["auto"] = false;
+        information["speed"] = req.body.sliderSpeed;
+    }
+
+    if (loggedInUser != null) {
+        let the_username = await getUsername();
+        try {
+            const info = await UserStat.find({ the_username }) // console.log("the info from this user is ", info[0].mode)
+            try {
+                await UserStat.findOneAndUpdate(
+                    { "username": the_username },
+                    { "$push": { mode: the_mode } }
+                )
+            } catch (err) { console.log("Found the user in stats db but could not push the mode") }
+        } catch (err) { console.log("Could not find the username in the stats database") }
+    }
+    // publishing data to MQTT
+    client.publish(default_pub_topic, JSON.stringify(information));
+    console.log(`Send '${JSON.stringify(information)}' from topic '${default_pub_topic}'`)
+})
+
+
+// Route to return the last data based in the sensors_database
+app.get("/getFanPressure", async (req, res) => {
+    if (loggedInUser != null) {
+        try {
+            const fanPressure = await retrieveData();
+            res.json(fanPressure[0])
+        } catch (err) {
+            console.log("could not retrieve information from the latest fan pressure")
+        }
+    } else {
+        res.redirect('/');
+    }
+})
+
+// Route to return either all the information from the users (if it is a teacher) or information from a specific student
+app.get("/getuserdata", async (req, res) => {
+    if (loggedInUser != null) {
+        try {
+            const userdata = await getUserstat(teacherCheck());
+            res.json(userdata)
+        } catch (err) {
+            console.log("could not retrieve user statistics:", err)
+        }
+    } else {
+        res.redirect('/');
+    }
+})
+
+// Route to return a specific json information for the current user logged in
+app.get("/getmyinfo", async (req, res) => {
+    if (loggedInUser != null) {
+        const userdata = await getUserstat(false);
+        console.log(userdata)
+        res.json(userdata)
+    } else {
+        res.redirect('/');
+    }
+})
+
+// MQTT CONFIGURATION
+
+// Client subscribes and saves data into the database
+const addr = 'mqtt://192.168.56.1:1883';
+
+let default_pub_topic = "controller/settings"
+let default_sub_topic = "controller/status"
+const client = mqtt.connect(addr);
+
+client.on("connect", function (err) {
+    client.subscribe(default_sub_topic);
+    console.log("client has subscribed succesfully");
+});
+
+client.on("message", async function (topic, message) {
+    var data = JSON.parse(message);
+    let new_data = new Data({
+        nr: data.nr,
+        speed: data.speed,
+        setpoint: data.setpoint,
+        pressure: data.pressure,
+        auto: data.auto,
+        error: data.error,
+        co2: data.co2,
+        rh: data.rh,
+        temperature: data.temp,
+        date: new Date().toJSON().slice(0, 10).replace(/-/g, "/"),
+    });
+    try {
+        var saved_data = await new_data.save()
+        console.log(saved_data)
+    } catch (err) {
+        console.log(err);
+    }
+});
+
+// FUNCTIONS USED DURING THE ROUTING
+
+/**
+ * @function myAuthorizer
+ * @parameters recieves the username of the form input along with its password
+ * @description encripts the username and password of the user to register them
+ * @return {none} it sets loggedInUser as null or sets 
+ **/
 async function myAuthorizer(username, password) {
     const key = crypto.pbkdf2Sync(password, "salt", 10000, 64, "sha512");
-
     const userQuery = await User.findOne({
         username: username,
         password: key.toString("hex"),
-    })
-        .then((user) => {
-            if (user) {
-                loggedInUser = user._id;
-            } else {
-                loggedInUser = null;
-                req.flash("error", "You must be signed in to see the content!");
-            }
-        })
-        .catch((err) => {
+    }).then((user) => {
+        if (user) {
+            loggedInUser = user._id;
+        } else {
             loggedInUser = null;
-        });
+        }
+    }).catch((err) => {
+        loggedInUser = null;
+    });
 }
 
-// checks if logged in user is a teacher or not
+/**
+ * @function getUsername
+ * @description gets the username from the id in the user database logginUser /= Null
+ * @return {object} returns an the username
+ **/
+async function getUsername() {
+    let username;
+    await User.findOne({ _id: loggedInUser }).then(user => {
+        username = user.username;
+    })
+        .catch(err => {
+            console.log(err);
+        });
+    return username;
+}
+
+
+/**
+ * @function getUserstat
+ * @description if the user calling the function is a teacher, it sends all the users information. 
+ * if it is a student, it retrieves just their own information.
+ * @return {object} returns all users information or an specific user
+ **/
+async function getUserstat(teacherCheck) {
+    if (await teacherCheck) {
+        return UserStat.find({}).exec();
+    } else {
+        const usr = await getUsername();
+        return await UserStat.findOne({ username: usr })
+            .exec();
+    }
+}
+
+/**
+ * @function teacherCheck
+ * @description check if the current user is a teacher or student
+ * @return {object} false if student, true if teacher
+ **/
 async function teacherCheck() {
     let state;
     const userQuery = await User.findById(loggedInUser)
@@ -410,7 +401,13 @@ async function teacherCheck() {
     return state;
 }
 
-// returns all the user information
+
+/**
+ * @function getUserInfo
+ * @description gets all the specific information of an user and their user tracking. logginUser /= Null
+ * @return {object} returns a how many times an user logged in, what commands have the used.
+ **/
+
 async function getUserInfo() {
     let info;
     const username = await getUsername()
@@ -422,4 +419,13 @@ async function getUserInfo() {
             console.log(err);
         });
     return info;
+}
+
+/**
+ * @function retrieveData
+ * @description it takes the last information saved in the sensors database
+ * @return {object} last information from the sensors database
+ **/
+function retrieveData() {
+    return Data.find({}).sort({ createdAt: -1 }).limit(10).exec();
 }
