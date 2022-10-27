@@ -31,9 +31,9 @@ When you log in, you will be directed to the dashboard. On this page, you will b
 
 On the top of the page you will find a navigation bar which you can use to access the sensor data, user statistics page or log out.
 
-On the sensors page, you can see the pressure, Co2, speed and temperature measurements and <> on graphs.
+On the sensors page, you can see the pressure, Co2, speed and temperature measurements on graphs.
 
-On the User stats page, students will see their own account's login details, while teachers will be able to inspect each account's statistics.
+On the User stats page, students will see their own account's login details, while teachers will be able to inspect the login frequency on all accounts and their own statistics.
 ## Setting up the web interface
 To connect the web application to the ventilation system's controller, you have to manually set the MQTT connection up (IP address, port number, topics) hardcoded on the server side. The default topic for commands is <em>'controller/settings'</em> and <em>'controller/status'</em> for reading data from the ventilation system.
 
@@ -63,12 +63,32 @@ The used modules are:
 - [chart.js](https://www.npmjs.com/package/chartjs)
 - [ejs](https://www.npmjs.com/package/ejs)
 ## Accounts
-We handle account management with the help of the crypto-js module for password encryption/hashing and MongoDB for storing the account usernames and hashed passwords. Upon login requests, the input password is hashed and compared to the one in the database after querying for the entry with the username. Other than username and password, the database also records whether the user is a teacher in a boolean value.
+We handle account management with the help of the `crypto-js` module for password encryption/hashing and MongoDB for storing the account usernames and hashed passwords. Upon login requests, the input password is hashed and compared to the one in the database after querying for the entry with the username. Other than username and password, the database also records whether the user is a teacher in a boolean value.
 
+Example of a MongoDB user entry.
 ![Users](https://user-images.githubusercontent.com/70892020/198275946-a433216a-2759-4ee4-b2b7-b15675ec9936.png)
 
 ## Database access
 
+The Node.js server connects to the database via the `mongoose` module. The module allows us to create objects in the database based on our schemas and query through them. The schemas used by us describe users, user statistics and controller data.
+
+| Data        | UserStat           | User  |
+| :-------------: |:-------------:| :-----:|
+| nr: <em>Number</em>| username: <em>String</em> | username:  <em>String</em> |
+| speed: <em>Number</em>| logins: <em>[Date]</em>|password:  <em>String</em> |
+| setpoint: <em>Number</em> | mode: <em>[String]</em>|isTeacher: <em>Boolean</em> |
+| pressure: <em>Number</em> | <em>Timestamps</em>||
+| auto: <em>Boolean</em> |||
+| error: <em>Boolean</em> |||
+| co2: <em>Number</em> |||
+| rh: <em>Number</em> |||
+| temperature: <em>Number</em> |||
+| date: <em>Number</em> |||
+| <em>Timestamps</em> |||
+
+
 ## Controller connection
+
+We connect to the ventilation system via MQTT. To do this, we need the `mqtt` module. The setup of the connection is hardcoded in the `index.js` file.
 
 ## Visual design
