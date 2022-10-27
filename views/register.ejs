@@ -32,7 +32,7 @@
                 <form>
                     <div class="form-group">
                         <label>Username</label>
-                        <input type="text" class="form-control" name="username" placeholder="User Name" required/>
+                        <input type="text" class="form-control" name="username" placeholder="Username" required/>
                     </div>
                     <div class="form-group">
                         <label>Password</label>
@@ -50,6 +50,17 @@
             <a href="/">Go Back</a>
         </div>
     </div>
-
+    
+    <% var msg = message %>
+    <script defer>
+      var message = "<%= msg %>"
+  
+      window.setTimeout(function(){
+          if(message!=''){
+            alert(message);
+          }
+      }, 400); 
+  
+    </script>
 </body>
 </html>
