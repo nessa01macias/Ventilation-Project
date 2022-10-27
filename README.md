@@ -1,5 +1,7 @@
 # Ventilation-Project
-#### Web Application for ABB Ventilation Controller
+###### Created by Metropolia University of Applied Science students, 3rd yead, Smart IoT Systems major.
+### Web Application for ABB Ventilation Controller
+#### OVERVIEW
 
 # Contents
 - [User manual](#user-manual)
@@ -23,6 +25,7 @@ git clone https://github.com/nessa01macias/Ventilation-Project.git
 ```
 Downloading as a .zip package is available on the Github interface.
 ## Login
+
 Log in with your username and password on the localhost:PORT/ route. In case you don't have an account yet, click on the "Register now!" link.
 ## Registration
 You can register an account via the /register route. You will be required to provide a username and a password. To create a teacher/admin account, also provide the secret teacher code. This code is adjustable and changeable on the server side via a .env environment variable. You will be redirected to the login page.
