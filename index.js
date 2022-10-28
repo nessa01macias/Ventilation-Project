@@ -199,10 +199,12 @@ app.post("/update", async (req, res) => {
     if ("send_mode" in req.body) {
         the_mode = "auto";
         information["auto"] = true;
+        // information["setpoint"] = req.body.sliderPressure;
         information["pressure"] = req.body.sliderPressure;
     } else {
         the_mode = "manual";
         information["auto"] = false;
+        // information["setpoint"] = req.body.sliderSpeed;
         information["speed"] = req.body.sliderSpeed;
     }
 
@@ -221,6 +223,7 @@ app.post("/update", async (req, res) => {
     // publishing data to MQTT
     client.publish(default_pub_topic, JSON.stringify(information));
     console.log(`Send '${JSON.stringify(information)}' from topic '${default_pub_topic}'`)
+    res.redirect("/")
 })
 
 
@@ -267,14 +270,14 @@ app.get("/getmyinfo", async (req, res) => {
 
 // Client subscribes and saves data into the database
 
-//const addr = 'mqtt://192.168.1.254:1883';
-// let default_pub_topic = "G07/controller/settings"
-// let default_sub_topic = "G07/controller/status"
+const addr = 'mqtt://192.168.1.254:1883';
+let default_pub_topic = "Group5/controller/settings"
+let default_sub_topic = "Group5/controller/status"
 
-
-const addr = 'mqtt://192.168.56.1:1883';
-let default_pub_topic = "controller/settings"
-let default_sub_topic = "controller/status"
+// simulator
+// const addr = 'mqtt://192.168.56.1:1883';
+// let default_pub_topic = "controller/settings"
+// let default_sub_topic = "controller/status"
 
 const client = mqtt.connect(addr);
 

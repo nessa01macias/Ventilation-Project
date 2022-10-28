@@ -50,7 +50,7 @@
 
         <div id ="datediv">
             <label for="date"> <h2>Which date would you want to see?</h2> </label>
-            Start: <input id="start" type="date" min="2022-10-24" max="2022-10-28" value="2022-10-24"> End:  <input id="end" type="date" min="2022-10-24" max="2022-10-28" value="2022-10-28"> 
+            Start: <input id="start" type="date" min="2022-10-24" max="2022-10-28" value="2022-10-24"> End:  <input id="end" type="date" min="2022-10-24" max="2022-10-29" value="2022-10-28"> 
             <button class="button-74" onclick="filterDate()">Filter</button>
         </div>
 
@@ -102,7 +102,7 @@
                 fill: false,
                 borderColor: 'rgb(138, 201, 38)',
                 backgroundColor: 'rgb(138, 201, 38)',
-                borderWidth: 1.5
+                borderWidth: 1
             },
             {
                 label: 'Co2',
@@ -110,7 +110,7 @@
                 fill: false,
                 borderColor: 'rgb(255, 202, 58)',
                 backgroundColor: 'rgb(255, 202, 58)',
-                borderWidth: 1.5
+                borderWidth: 1
             },
             {
                 label: 'Speed',
@@ -118,7 +118,7 @@
                 fill: false,
                 borderColor: 'rgb(156, 10, 150)',
                 backgroundColor: 'rgb(156, 10, 150)',
-                borderWidth: 1.5
+                borderWidth: 1
             },
             {
                 label: 'Temperature',
@@ -126,7 +126,7 @@
                 fill: false,
                 borderColor: 'rgb(25, 130, 196)',
                 backgroundColor: 'rgb(25, 130, 196)',
-                borderWidth: 1.5
+                borderWidth: 1
             }
         ],
     }
@@ -157,7 +157,7 @@
 
     async function firstFilterDate(){
         const start = 1666558800000;
-        const end = 1666904400000;
+        const end = 1666818000000;
 
         console.log(start, end)
          
