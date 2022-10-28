@@ -48,26 +48,19 @@
         <h1> Sensor's information</h1>
     </div>
 
-    <form action="/date" method="POST">
         <div id ="datediv">
             <label for="date"> <h2>Which date would you want to see?</h2> </label>
-            <input type="date" id="date" name="date" required>
+            Start: <input id="start" type="date" min="2022-10-24" max="2022-10-28" value="2022-10-24"> End:  <input id="end" type="date" min="2022-10-24" max="2022-10-28" value="2022-10-28"> 
+            <button class="button-74" onclick="filterDate()">Filter</button>
         </div>
-        <button class="button-74"><span class="text">send data</span></button>
-    </form>
 
-    <h2>Date being displayed is</h2>
-    <h2 id="theRealDate"></h2>
-
-    <div class="chartCard">
+    <div class="chartCard"> 
         <div class="chartBox">
-            <canvas class="charts" id="myChart"></canvas>
-        </div>
-        <div class="chartBox">
-            <canvas class="charts" id="myPieChart"></canvas> 
+            <canvas class="charts" id="myChart" ></canvas>
         </div>
     </div>
 
+    <h2>Information of the sensors in real time:</h2>
     <div class="chartCard">
         <div class="chartBox2">
             <canvas class="charts" id="myPressureChart"></canvas>
@@ -90,9 +83,192 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <script src="/js/nav.js"></script>    
     <script src="/js/charts.js"></script>    
+    
+    <script>
+
+
+    // FIRST CHART
+
+    //set up
+    const data = {
+        labels: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        datasets: [
+            {
+                label: 'Pressure',
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                fill: false,
+                borderColor: 'rgb(138, 201, 38)',
+                backgroundColor: 'rgb(138, 201, 38)',
+                borderWidth: 1.5
+            },
+            {
+                label: 'Co2',
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                fill: false,
+                borderColor: 'rgb(255, 202, 58)',
+                backgroundColor: 'rgb(255, 202, 58)',
+                borderWidth: 1.5
+            },
+            {
+                label: 'Speed',
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                fill: false,
+                borderColor: 'rgb(156, 10, 150)',
+                backgroundColor: 'rgb(156, 10, 150)',
+                borderWidth: 1.5
+            },
+            {
+                label: 'Temperature',
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                fill: false,
+                borderColor: 'rgb(25, 130, 196)',
+                backgroundColor: 'rgb(25, 130, 196)',
+                borderWidth: 1.5
+            }
+        ],
+    }
+
+    // config
+    const config = {
+        type: 'line',
+        data: data,
+        options: {
+            title: {
+                text: "Information from the sensors",
+                display: true
+            },
+            x: {
+                type: 'time',
+            },
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+
+    // render
+    const myChart = new Chart(
+        document.getElementById('myChart'),
+        config
+    );
+
+    async function firstFilterDate(){
+        const start = 1666558800000;
+        const end = 1666904400000;
+
+        console.log(start, end)
+         
+        const all_data = await fetchSensorsData();
+        const convertedDates = all_data[4]
+     
+        const filterDates = convertedDates.filter(date => date >= start && date <= end)
+        let filterInDatesFormat = []
+        for (let date of filterDates) {
+            let new_date = new Date(date);
+            new_date = new_date.toLocaleString()
+            filterInDatesFormat.push(new_date);
+        }
+
+
+        //working on the data
+        const startArray = convertedDates.indexOf(filterDates[0])
+        const endArray = convertedDates.indexOf(filterDates[filterDates.length -1])
+
+        // console.log(pressure, co2, speed, temperature, dates )
+        const copyDataPressure = [...all_data[0]]
+        const copyDataCo2 = [...all_data[1]]
+        const copyDataSpeed = [...all_data[2]]
+        const copyDataTemperature = [...all_data[3]]
+
+        copyDataPressure.splice(endArray + 1, filterDates.length);
+        copyDataPressure.splice(0, startArray);
+
+        copyDataCo2.splice(endArray + 1, filterDates.length);
+        copyDataCo2.splice(0, startArray);
+
+        copyDataSpeed.splice(endArray + 1, filterDates.length);
+        copyDataSpeed.splice(0, startArray);
+
+        copyDataTemperature.splice(endArray + 1, filterDates.length);
+        copyDataTemperature.splice(0, startArray);
+
+        // pressure
+        myChart.config.data.datasets[0].data = copyDataPressure
+        // co2
+        myChart.config.data.datasets[1].data = copyDataCo2
+        // speed
+        myChart.config.data.datasets[2].data = copyDataSpeed
+        // temperature
+        myChart.config.data.datasets[3].data = copyDataTemperature
+        // labels
+        myChart.config.data.labels = filterInDatesFormat;
+
+        myChart.update()
+
+    }
+
+    async function filterDate(){
+
+        const start1 = new Date(document.getElementById('start').value);
+        const start = start1.setHours(0,0,0,0);
+        const end1 = new Date(document.getElementById('end').value);
+        const end = end1.setHours(0,0,0,0);
+
+        console.log(start, end)
+         
+        const all_data = await fetchSensorsData();
+        const convertedDates = all_data[4]
+     
+        const filterDates = convertedDates.filter(date => date >= start && date <= end)
+        let filterInDatesFormat = []
+        for (let date of filterDates) {
+            let new_date = new Date(date);
+            new_date = new_date.toLocaleString()
+            filterInDatesFormat.push(new_date);
+        }
+
+
+        //working on the data
+        const startArray = convertedDates.indexOf(filterDates[0])
+        const endArray = convertedDates.indexOf(filterDates[filterDates.length -1])
+
+        // console.log(pressure, co2, speed, temperature, dates )
+        const copyDataPressure = [...all_data[0]]
+        const copyDataCo2 = [...all_data[1]]
+        const copyDataSpeed = [...all_data[2]]
+        const copyDataTemperature = [...all_data[3]]
+
+        copyDataPressure.splice(endArray + 1, filterDates.length);
+        copyDataPressure.splice(0, startArray);
+
+        copyDataCo2.splice(endArray + 1, filterDates.length);
+        copyDataCo2.splice(0, startArray);
+
+        copyDataSpeed.splice(endArray + 1, filterDates.length);
+        copyDataSpeed.splice(0, startArray);
+
+        copyDataTemperature.splice(endArray + 1, filterDates.length);
+        copyDataTemperature.splice(0, startArray);
+
+        // pressure
+        myChart.config.data.datasets[0].data = copyDataPressure
+        // co2
+        myChart.config.data.datasets[1].data = copyDataCo2
+        // speed
+        myChart.config.data.datasets[2].data = copyDataSpeed
+        // temperature
+        myChart.config.data.datasets[3].data = copyDataTemperature
+        // labels
+        myChart.config.data.labels = filterInDatesFormat;
+
+        myChart.update()
+    }
+    // 10/24/2022 - 10-28/2022
+        firstFilterDate()
+    </script>
 </body>
 </html>
 

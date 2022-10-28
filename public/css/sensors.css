@@ -14,8 +14,8 @@
   margin-top: 3em;
   margin-bottom: 2em;
   margin-right: 2em;
-  width: 550px;
-  padding:20px;
+  width: 85%;
+  height: 60%;
   border-radius: 10px;
   border: solid 3px rgb(59, 67, 104);
   position:relative;
@@ -24,7 +24,6 @@
 }
 
 .chartCard{
-  width:100vw;
   display: flex;
   align-items: center;
   justify-content: center;
