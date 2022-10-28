@@ -42,14 +42,14 @@
 
 #mode {
   padding-top: 3em;
-  font-family: "Rubik", sans-serif;
+  font-family: 'Montserrat', sans-serif;    
   max-width: 85em;
   margin-left: auto;
   margin-right: auto;
 }
 #pressure {
   font-size: 20px;
-  font-family: "Rubik", sans-serif;
+  font-family: 'Montserrat', sans-serif;    
   max-width: 85em;
   margin-left: auto;
   margin-right: auto;
@@ -57,14 +57,14 @@
 
 #speed {
   font-size: 20px;
-  font-family: "Rubik", sans-serif;
+  font-family: 'Montserrat', sans-serif;    
   max-width: 85em;
   margin-left: auto;
   margin-right: auto;
 }
 #co2 {
   font-size: 20px;
-  font-family: "Rubik", sans-serif;
+  font-family: 'Montserrat', sans-serif;    
   max-width: 85em;
   margin-left: auto;
   margin-right: auto;
@@ -72,7 +72,7 @@
 
 #time {
   font-size: 20px;
-  font-family: "Rubik", sans-serif;
+  font-family: 'Montserrat', sans-serif;    
   max-width: 85em;
   margin-left: auto;
   margin-right: auto;
@@ -143,7 +143,7 @@ input:checked + .slider:before {
   top: 50%;
   left: 50%;
   font-size: 25px;
-  font-family: "Rubik", sans-serif;
+  font-family: 'Montserrat', sans-serif;    
 }
 
 input:checked + .slider .auto {
@@ -233,7 +233,7 @@ input:checked + .slider .manual {
   color: rgb(59, 67, 104);
   font-size: 1.7rem;
   position: absolute;
-  left: 87%;
+  left: 82%;
 }
 
 /* --setting the '0' for the both slides*/
@@ -242,7 +242,7 @@ input:checked + .slider .manual {
   color: rgb(59, 67, 104);
   font-size: 2rem;
   position: absolute;
-  left: 12%;
+  left: 16%;
 }
 
 /*---range-fan-speed---*/
@@ -282,12 +282,12 @@ input:checked + .slider .manual {
   color: rgb(59, 67, 104);
   font-size: 1.7rem;
   position: absolute;
-  left: 87%;
+  left: 82%;
 }
 
 .mb-2 {
   font-size: 2rem;
-  font-family: "Rubik", sans-serif;
+  font-family: 'Montserrat', sans-serif;    
   max-width: 85em;
   margin-left: auto;
   margin-right: auto;
@@ -295,7 +295,7 @@ input:checked + .slider .manual {
 
 .mt-1 {
   font-size: 2rem;
-  font-family: "Rubik", sans-serif;
+  font-family: 'Montserrat', sans-serif;    
   max-width: 85em;
   margin-left: auto;
   margin-right: auto;
@@ -354,6 +354,6 @@ input:checked + .slider .manual {
 }
 
 .setfont{
-  font-family: "Rubik", sans-serif;
+  font-family: 'Montserrat', sans-serif;    
 
 }

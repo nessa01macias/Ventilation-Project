@@ -46,7 +46,7 @@
 
     <div>
         <h2> <%= teacher.username %> , your history is here.</h2>
-        <h3> Since <%= teacher.createdAt %>  when you created your account, you have logged in <%=  teacher.logins.length %>  times</h3>
+        <h3> Since <%= teacher.createdAt.toLocaleString() %>  when you created your account, you have logged in <%=  teacher.logins.length %>  times</h3>
     </div> 
     <h3 id ="areThereStudents"></h3>
     
