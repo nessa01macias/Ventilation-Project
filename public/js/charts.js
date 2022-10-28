@@ -1,18 +1,40 @@
 
 /**
- * @function  gettingData
- * @description fetches the information from the sensors (/date) to display it in sensors information page. 
- * /date is a POST request as the route is also used to recieve the form information from the calendar input.
+ * @function  fetchSensorsData
+ * @description fetches the information from the sensors (/datasensors) to display it in sensors information page. 
+ * cleans the json file and returns all the data in a nice array
  * @return {object} information from the sensors
  **/
-async function gettingData() {
-    let recievedData = await fetch('http://localhost:8000/date', {
-        method: 'POST'
-    })
-    let data_json = await recievedData.json()
-    console.log("data recieved is ", data_json)
-    return data_json
-}
+async function fetchSensorsData() {
+    // recieved: pressure, co2, speed & temperature
+    let data = await fetch('http://localhost:8000/datasensors')
+    let data_json = await data.json()
+
+    let pressure = []
+    let co2 = []
+    let speed = []
+    let temperature = []
+    let dates = []
+    let manual = 0
+    let auto = 0
+
+
+    for (let data of data_json) {
+        pressure.push(data['pressure'])
+        co2.push(data['co2'])
+        speed.push(data['speed'])
+        temperature.push(data['temperature'])
+        dates.push(new Date(data['createdAt']).setHours(0, 0, 0, 0))
+        if (data.auto) {
+            auto = auto + 1
+        } else if (!data.auto) {
+            manual = manual + 1
+        }
+    }
+    // console.log(pressure, co2, speed, temperature, dates )
+    return [pressure, co2, speed, temperature, dates]
+};
+
 
 /**
  * @function  gettingLastData
@@ -36,61 +58,27 @@ async function gettingLastData() {
 function updateCharts() {
     setInterval(function () {
         async function fetchData() {
-            // recieved: pressure, co2, speed & temperature
-            let data_json = await gettingData() // console.log(data_json, data_json[0].theRealDate)
-            document.getElementById("theRealDate").innerHTML = data_json[0].theRealDate
-
-            let pressure = []
-            let co2 = []
-            let speed = []
-            let temperature = []
-            let labels = []
-            let manual = 0
-            let auto = 0
-
             let last_data_json = await gettingLastData()
 
-            for (let data of data_json) {
-                pressure.push(data['pressure'])
-                co2.push(data['co2'])
-                speed.push(data['speed'])
-                temperature.push(data['temperature'])
-                labels.push(data['date'])
-                if (data.auto) {
-                    auto = auto + 1
-                } else if (!data.auto) {
-                    manual = manual + 1
-                }
-            }
             // console.log([labels, pressure, co2, speed, temperature])
-            datapoints = [[labels, pressure, co2, speed, temperature], [auto, manual], [last_data_json.pressure, last_data_json.co2, last_data_json.speed, last_data_json.temperature]]
+            datapoints = [last_data_json.pressure, last_data_json.co2, last_data_json.speed, last_data_json.temperature]
             return datapoints;
         };
 
         fetchData().then(datapoints => {
             // console.log(datapoints, myChart)
-            myChart.config.data.labels = datapoints[0][0];
-            myChart.config.data.datasets[0].data = datapoints[0][1];
-            myChart.config.data.datasets[1].data = datapoints[0][2];
-            myChart.config.data.datasets[2].data = datapoints[0][3];
-            myChart.config.data.datasets[3].data = datapoints[0][4];
-            myChart.update();
 
-            myPieChart.config.data.datasets[0].data = datapoints[1];
-            myPieChart.update();
-
-            myPressureChart.config.data.datasets[0].data = [datapoints[2][0], 100 - datapoints[2][0]];
+            myPressureChart.config.data.datasets[0].data = [datapoints[0], 100 - datapoints[0]];
             myPressureChart.update();
 
-            myCo2Chart.config.data.datasets[0].data = [datapoints[2][1], 500 - datapoints[2][1]];
+            myCo2Chart.config.data.datasets[0].data = [datapoints[1], 500 - datapoints[1]];
             myCo2Chart.update();
 
-            mySpeedChart.config.data.datasets[0].data = [datapoints[2][2], 100 - datapoints[2][2]];
+            mySpeedChart.config.data.datasets[0].data = [datapoints[2], 100 - datapoints[2]];
             mySpeedChart.update();
 
-            myTempatureChart.config.data.datasets[0].data = [datapoints[2][3], 100 - datapoints[2][3]];
+            myTempatureChart.config.data.datasets[0].data = [datapoints[3], 100 - datapoints[3]];
             myTempatureChart.update();
-
         })
     }, 2000);
 }
@@ -99,96 +87,6 @@ document.addEventListener('DOMContentLoaded', function () {
     updateCharts();
 })
 
-// FIRST CHART
-
-//set up
-const data = {
-    labels: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    datasets: [
-        {
-            label: 'Pressure',
-            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            fill: false,
-            borderColor: 'rgb(138, 201, 38)',
-            backgroundColor: 'rgb(138, 201, 38)',
-            borderWidth: 1.5
-        },
-        {
-            label: 'Co2',
-            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            fill: false,
-            borderColor: 'rgb(255, 202, 58)',
-            backgroundColor: 'rgb(255, 202, 58)',
-            borderWidth: 1.5
-        },
-        {
-            label: 'Speed',
-            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            fill: false,
-            borderColor: 'rgb(156, 10, 150)',
-            backgroundColor: 'rgb(156, 10, 150)',
-            borderWidth: 1.5
-        },
-        {
-            label: 'Temperature',
-            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            fill: false,
-            borderColor: 'rgb(25, 130, 196)',
-            backgroundColor: 'rgb(25, 130, 196)',
-            borderWidth: 1.5
-        }
-    ],
-}
-
-// config
-const config = {
-    type: 'line',
-    data: data,
-    options: {
-        maintainAspectRation: false,
-        aspectRatio: 1
-    }
-}
-
-// render
-const myChart = new Chart(
-    document.getElementById('myChart'),
-    config
-);
-
-
-// SECOND CHART
-
-const data_pie = {
-    labels: ['Auto', 'Manual'],
-    datasets: [{
-        label: ['# of auto'],
-        data: [50, 50],
-        backgroundColor: [
-            'rgb(25, 130, 196, 0.2)',
-            'rgb(156, 10, 150, 0.2)',
-        ],
-        borderColor: [
-            'rgb(25, 130, 196)',
-            'rgb(156, 10, 150)',
-        ],
-        borderWidth: 1
-    }]
-}
-
-const config_pie = {
-    type: 'bar',
-    data: data_pie,
-    options: {
-        aspectRatio: 1
-    },
-    plugins: [ChartDataLabels]
-};
-
-const myPieChart = new Chart(
-    document.getElementById('myPieChart'),
-    config_pie
-);
 
 // PRESSURE CHART
 

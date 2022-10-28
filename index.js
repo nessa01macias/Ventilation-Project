@@ -10,8 +10,6 @@ const mongoose = require('mongoose');
 const flash = require("connect-flash")
 const methodOverride = require("method-override");
 const path = require('path');
-const { Server } = require("socket.io");
-const { createServer } = require("http");
 const app = express()
 
 // is the user logged in
@@ -21,7 +19,6 @@ var loggedInUser = null;
 const Data = require("./models/Data")
 const User = require('./models/User');
 const UserStat = require('./models/Userstat');
-const setdate = require("./middleware/setdate")
 const { findById } = require('./models/Data');
 
 // assign mongoose promise library and connect to database
@@ -170,40 +167,30 @@ app.listen(process.env.PORT, () => {
 
 // API ROUTES FOR FETCHING INFORMATION
 
-// Route that gets the value of the data of certain date or in the current day.
-// It takes the set data middleware which tells the function is the data from the calendar input exists in the database
-app.post("/date", setdate, async (req, res) => {
-
-    let theRealDate = res.locals.date;
-    console.log("Date being used is", theRealDate);
+// Route that gets the all the data from the sensors
+app.get("/datasensors", async (req, res) => {
     try {
-        const datas = await Data.find({}); // pressure, co2, speed & temperature
-        const sendData = [];
+        const datas = await Data.find({});
+        const the_data = [];
         for (let data of datas) {
-            let date = data.createdAt.toISOString();  // console.log(date)
-            const [onlyDateDB] = date.split("T");   // console.log(onlyDateDB)
-            if (theRealDate === onlyDateDB) {
-                sendData.push({
-                    theRealDate: theRealDate,
-                    date: date,
-                    pressure: data.pressure,
-                    co2: data.co2,
-                    speed: data.speed,
-                    temperature: data.temperature,
-                    auto: data.auto,
-                });
-            }
+            the_data.push({
+                pressure: data.pressure,
+                co2: data.co2,
+                speed: data.speed,
+                temperature: data.temperature,
+                auto: data.auto,
+                createdAt: data.createdAt
+            });
         }
-        console.log(sendData);
-        if (sendData.length != 0) res.json(sendData);
-        else {
-            console.log("the array of data is empty");
-            res.redirect("/stats");
-        }
+        // console.log(the_data)
+        return res.json(the_data);
     } catch (err) {
         console.log(err);
     }
-});
+})
+
+
+
 
 // Route to publish data to MQTT when user changes the mode (auto or manual) in dashboard
 app.post("/update", async (req, res) => {
@@ -279,11 +266,16 @@ app.get("/getmyinfo", async (req, res) => {
 // MQTT CONFIGURATION
 
 // Client subscribes and saves data into the database
-const addr = 'mqtt://192.168.56.1:1883';
-// const addr = 'mqtt://192.168.1.254:1883';
 
+//const addr = 'mqtt://192.168.1.254:1883';
+// let default_pub_topic = "G07/controller/settings"
+// let default_sub_topic = "G07/controller/status"
+
+
+const addr = 'mqtt://192.168.56.1:1883';
 let default_pub_topic = "controller/settings"
 let default_sub_topic = "controller/status"
+
 const client = mqtt.connect(addr);
 
 client.on("connect", function (err) {
