@@ -1,126 +1,195 @@
+@import url("https://fonts.googleapis.com/css2?family=Rubik:wght@300;500&display=swap");
+
 *{
-    text-align: center;
-    align-items: center;
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  text-align: center;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  font-family: "Rubik", sans-serif;
+  box-sizing: border-box;
 }
 
 
 h2 {
-    margin-top: 1em;
-    margin-bottom: 0.5em;
-    font-size: 30px;
-    text-align: center;
-    font-weight: 600;
-    background-image: linear-gradient(to left, rgb(104, 156, 197), rgb(59, 67, 104));
-    -webkit-text-stroke: 1px #422800;
-    color: transparent;
-    background-clip: text;
-    -webkit-background-clip: text;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+  font-size: 30px;
+  text-align: center;
+  font-weight: 600;
+  background-image: linear-gradient(to left, rgb(104, 156, 197), rgb(59, 67, 104));
+  -webkit-text-stroke: 1px #422800;
+  color: transparent;
+  background-clip: text;
+  -webkit-background-clip: text;
 }
 
 .chartBox {
-    margin-top: 3em;
-    margin-bottom: 2em;
-    margin-right: 2em;
-    margin-left: 3em;
-    width: 400px;
-    padding:20px;
-    border-radius: 10px;
-    border: solid 3px rgb(59, 67, 104);
-    display: inline-block;
-    background: white;
+  margin-top: 3em;
+  margin-bottom: 2em;
+  margin-right: 2em;
+  margin-left: 3em;
+  width: 400px;
+  padding:20px;
+  border-radius: 10px;
+  border: solid 3px rgb(59, 67, 104);
+  display: inline-block;
+  background: white;
+}
+
+
+.chartBox2 {
+  margin-top: 3em;
+  margin-bottom: 2em;
+  margin-right: 2em;
+  margin-left: 3em;
+  height: 400px;
+  width: 700px;
+  padding:20px;
+  border-radius: 10px;
+  position: relative;
+  vertical-align:top;
+  border: solid 3px rgb(59, 67, 104);
+  display: inline-block;
+  background: white;
+}
+
+
+#wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   }
-  
 
-  .chartBox2 {
-    margin-top: 3em;
-    margin-bottom: 2em;
-    margin-right: 2em;
-    margin-left: 3em;
-    height: 400px;
-    width: 700px;
-    padding:20px;
-    border-radius: 10px;
-    position: relative;
-    vertical-align:top;
-    border: solid 3px rgb(59, 67, 104);
-    display: inline-block;
-    background: white;
-  }
-  
-
-  #wrapper {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    }
-
-  #div-table{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 3em;
-    margin-bottom: 2em;
-    margin-right: 10em;
-    margin-left: 10em;
+#div-table{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 3em;
+  margin-bottom: 2em;
+  margin-right: 10em;
+  margin-left: 10em;
 
 }
 
-  .table{
+.table{
+  width: 100%;
+  border-collapse: collapse;
+  border: solid 3px rgb(59, 67, 104);
+  background: white;
+}
+
+.table td,.table th{
+  padding:12px 15px;
+  border:1px solid #ddd;
+  text-align: center;
+  font-size:15px;
+  font-weight: bold;
+}
+
+.table th{
+  background-color: rgb(59, 67, 104);
+  color:#ffffff;
+}
+
+.table tbody tr:nth-child(even){
+  background-color: rgb(244, 241, 255);
+}
+
+/*responsive*/
+
+@media only screen and (max-width:700px) {
+  .chartBox{
+    width: 90%;
+  height: 45%;
+  padding: 20px;
+  }
+  .chartBox2{
+     width: 90%;
+  height: 45%;
+  padding: 20px;
+  }
+    body{
+      margin: 0px;
+     }
+}
+@media only screen and (max-width:400) {
+  .chartCard{
+    width: 90%;
+  height: 45%;
+  padding: 20px;
+  }
+  .chartBox2{
+    width: 90%;
+    height: 45%;
+    padding: 20px;
+  }
+  body{
+    margin: 0px;
+   }
+}
+@media only screen and (max-width:400) {
+  .chartCard{
+    width: 90%;
+  height: 45%;
+  padding: 20px;
+  }
+  .chartBox2{
+    width: 200%;
+    height: 200px;
+    padding: 20px;
+  }
+  body{
+    margin: 0px;
+   }
+}
+@media (max-width: 500px) {
+  .table thead {
+    display: none;
+    max-width: 85em;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .table,
+  .table tbody,
+  .table tr,
+  .table td {
+    display: block;
     width: 100%;
-    border-collapse: collapse;
-    border: solid 3px rgb(59, 67, 104);
-    background: white;
+    max-width: 85em;
+    margin-left: auto;
+    margin-right: auto;
   }
-  
-  .table td,.table th{
-    padding:12px 15px;
-    border:1px solid #ddd;
-    text-align: center;
-    font-size:15px;
+  .table tr {
+    margin-bottom: 15px;
+    max-width: 85em;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .table td {
+    text-align: right;
+    padding-left: 50%;
+    text-align: right;
+    position: relative;
+    max-width: 85em;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .table td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0;
+    width: 50%;
+    padding-left: 15px;
+    font-size: 15px;
     font-weight: bold;
+    text-align: left;
+    max-width: 85em;
+    margin-left: auto;
+    margin-right: auto;
   }
-  
-  .table th{
-    background-color: rgb(59, 67, 104);
-    color:#ffffff;
-  }
-  
-  .table tbody tr:nth-child(even){
-    background-color: rgb(244, 241, 255);
-  }
-  
-  /*responsive*/
-  
-  @media(max-width: 500px){
-    .table thead{
-      display: none;
-    }
-  
-    .table, .table tbody, .table tr, .table td{
-      display: block;
-      width: 100%;
-    }
-    .table tr{
-      margin-bottom:15px;
-    }
-    .table td{
-      text-align: right;
-      padding-left: 50%;
-      text-align: right;
-      position: relative;
-    }
-    .table td::before{
-      content: attr(data-label);
-      position: absolute;
-      left:0;
-      width: 50%;
-      padding-left:15px;
-      font-size:15px;
-      font-weight: bold;
-      text-align: left;
-    }
-  }
+  body{
+    margin: 0px;
+   }
+}

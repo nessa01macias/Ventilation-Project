@@ -1,9 +1,13 @@
+@import url("https://fonts.googleapis.com/css2?family=Rubik:wght@300;500&display=swap");
+
 * {
     padding: 0;
     margin: 0;
     box-sizing: border-box;
     text-align: center;
     align-items: center;
+    font-family: "Rubik", sans-serif;
+    
 }
 
 #svg {
@@ -11,7 +15,7 @@
     height:420px;
 }
 
-.rotate-image{
+.rotate-image::before{
     text-align: center;
     transform: rotate(180deg);
 }
@@ -68,6 +72,7 @@ a {
 }
 
 .bar{
+    position: relative;
     display: block;
     width: 25px;
     height: 3px;
@@ -83,19 +88,22 @@ a {
     }
 
     .hamburger.active .bar:nth-child(2){
+        content: "";
         opacity: 0;
     }
 
-    .hamburger.active .bar:nth-child(1){
+    .hamburger.active .bar:nth-child(1)::after{
+        content: "";
         transform: translateY(8px) rotate(45deg);
     }
 
-    .hamburger.active .bar:nth-child(3){
+    .hamburger.active .bar:nth-child(3)::before{
+        content: "";
         transform: translateY(-8px) rotate(-45deg);
     }
 
     .nav-menu{
-        position: fixed;
+        position: relative;
         left: -100%;
         top: 70px;
         gap: 0;

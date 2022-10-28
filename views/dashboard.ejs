@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -9,11 +10,12 @@
 
     <title>Dashboard</title>
 </head>
+
 <body>
 
     <header>
         <nav class="navbar">
-            <a href="#" class="nav-branding" >Ventilation Project - Group 5</a>
+            <a href="#" class="nav-branding">Ventilation Project - Group 5</a>
 
             <ul class="nav-menu">
 
@@ -43,10 +45,6 @@
         </nav>
     </header>
 
-    <!-- <div class="rotate-container">
-        <img src="/public/fan.svg" alt="fan-svg" id="svg">
-    </div> -->
-
     <main class="w-full px-3 py-32 relative flex flex-row border-b-2 border-r-2 border-l-2 border-indigo-300 rounded-b-2xl" id="main_content">
 
         <div class="wrapper">
@@ -59,95 +57,93 @@
                 <p class="text-left" id="pressure"></p>
                 <p class="text-left" id="speed"></p>
                 <p class="text-left" id="co2"></p>
+                <p class="text-left" id="time"></p>
 
             </div>
         </div>
- 
-        <form action="/update" method="POST">
-            <section class="w-2/3 flex flex-col items-center my-auto">
-                <div>
-                    <label class="switch">
-                        <input type="checkbox" name="send_mode" value="auto" id="toggleBtn" onclick="toggle()">
-                        <div class="slider round">
-                            <span class="manual" id="toggle-text">Manual</span>
-                            <span class="auto" id="toggle2-text">Auto</span>
-                        </div>
-                    </label>
-                </div>
-                <div id ="twoSliders">
-                    <div class="slidercontainer" id="sliderPressureContainer">
-                        <div class="mb-2">Pressure</div><br>
-                        <input type="range" min="0" max="120" name="sliderPressure"  class="sliderPressure thetwoofus" id="sliderPressure">
-                        <br><p id="sliderPressureValue"></p>
-                        <div class="mt-1" id="displayPressure"></div>
-                    </div>
 
-                    <div class="slidercontainer" id="sliderSpeedContainer">
-                        <div class="mb-2">Fan speed</div><br>
-                        <input type="range" min="0" max="100" name="sliderSpeed"  class="sliderSpeed thetwoofus" id="sliderSpeed">
-                        <br><p id="sliderSpeedValue" ></p>
-                        <div class="mt-1" id="displaySpeed"></div>
+
+    <form action="/update" method="POST">
+        <section class="w-2/3 flex flex-col items-center my-auto">
+            <div>
+                <label class="switch">
+                    <input type="checkbox" name="send_mode" value="auto" id="toggleBtn" onclick="toggle()">
+                    <div class="slider round">
+                        <span class="manual" id="toggle-text">Manual</span>
+                        <span class="auto" id="toggle2-text">Auto</span>
                     </div>
+                </label>
+            </div>
+            <div id="twoSliders">
+                <div class="slidercontainer" id="sliderPressureContainer">
+                    <div class="mb-2">Pressure</div><br>
+                    <input type="range" min="0" max="120" name="sliderPressure" class="sliderPressure thetwoofus"
+                        id="sliderPressure">
+                    <br>
+                    <p id="sliderPressureValue"></p>
+                    <div class="mt-1" id="displayPressure"></div>
                 </div>
 
-                <div id="divbutton">
-                    <button id="mybutton"><span class="text">Set new mode or values</span></button>
-                 </div>
+                <div class="slidercontainer" id="sliderSpeedContainer">
+                    <div class="mb-2">Fan speed</div><br>
+                    <input type="range" min="0" max="100" name="sliderSpeed" class="sliderSpeed thetwoofus"
+                        id="sliderSpeed">
+                    <br>
+                    <p id="sliderSpeedValue"></p>
+                    <div class="mt-1" id="displaySpeed"></div>
+                </div>
+            </div>
 
-                 </form>
+            <div id="divbutton">
+                <button id="mybutton"><span class="text">Set new mode or values</span></button>
+            </div>
+        </form>
 
-                 <div id="statusbox">
-                    <h2>Connection status:<h2> <div id="status"></div><br>
-                </div>
+
+            <div id="statusbox">
+                <h2 class="setfont">Connection status:<h2> <div id="status" class="setfont"></div><br>
+            </div>
         </section>
     </main>
 
 
     <script>
-
         // showing the value of the slider
         let sliderPressure = document.getElementById("sliderPressure");
         let sliderSpeed = document.getElementById("sliderSpeed");
-
         let sliderPressureValue = document.getElementById("sliderPressureValue");
         let sliderSpeedValue = document.getElementById("sliderSpeedValue");
 
-        
-
-        sliderPressureValue.innerHTML = sliderPressure.value; 
-        sliderPressure.oninput = function(){
+        sliderPressureValue.innerHTML = sliderPressure.value;
+        sliderPressure.oninput = function () {
             sliderPressureValue.innerHTML = this.value;
         }
-
-        sliderSpeedValue.innerHTML = sliderSpeed.value; 
-        sliderSpeed.oninput = function(){
+        sliderSpeedValue.innerHTML = sliderSpeed.value;
+        sliderSpeed.oninput = function () {
             sliderSpeedValue.innerHTML = this.value;
         }
-
-
-
         // This part hides the range when the correct mode is hidden; manual -> fan speed , auto -> pressure
         let pressure_container = document.getElementById("sliderPressureContainer");
         let speed_container = document.getElementById("sliderSpeedContainer");
         speed_container.style.display = 'block';
-        pressure_container.style.display = 'none';    
-        function toggle(){
-            if(document.getElementById("toggleBtn").checked === true) {
-               // console.log("i am in auto!!!!!")
+        pressure_container.style.display = 'none';
+        function toggle() {
+            if (document.getElementById("toggleBtn").checked === true) {
+                // console.log("i am in auto!!!!!")
                 pressure_container.style.display = 'block';
                 speed_container.style.display = 'none';
             } else {
-               // console.log("i am in manual!!!!!")
+                // console.log("i am in manual!!!!!")
                 pressure_container.style.display = 'none';
                 speed_container.style.display = 'block';
             }
         }
-        function startLiveUpdate(){
-            setInterval(function (){
-                fetch('http://localhost:8000/getFanPressure').then(function(response){
-                   // console.log(response)
+        function startLiveUpdate() {
+            setInterval(function () {
+                fetch('http://localhost:8000/getFanPressure').then(function (response) {
+                    // console.log(response)
                     return response.json()
-                }).then(function(data) {
+                }).then(function (data) {
                     var currentStatus = "auto"
                     if (!data.auto) currentStatus = "manual"
                     // date conversion 
@@ -157,8 +153,8 @@
                     time = time.substring(0, 8)
                     h = time.split(":")
                     n = (parseInt(h[0]) + 3) % 24
-                    if (n.length === 1){
-                    n= "0" + n;
+                    if (n.length === 1) {
+                        n = "0" + n;
                     }
                     time = n + ":" + h[1] + ":" + h[2]
                     document.getElementById("mode").innerHTML = "Current mode: " +  currentStatus 
@@ -181,25 +177,25 @@
                 }).catch( function(error){
                     console.log(error)
                 })
-            }, 2000);
+            }, 1000);
         }
-        document.addEventListener('DOMContentLoaded', function(){
+        document.addEventListener('DOMContentLoaded', function () {
             startLiveUpdate();
         })
-        
+
         // rotate image
         const img = document.querySelector("#fan");
         let rtdeg = 0;
         // console.log(img);
-        setInterval(()=> {
+        setInterval(() => {
             rtdeg++;
             if (rtdeg == 360) rtdeg = 0;
             // img.style.transform = 'rotate("+rtdeg"deg)';
             img.style.transform = `rotate(${rtdeg}deg)`;
         }, 10)
-        </script>
-        <script src="/js/nav.js"></script>    
-        <script src="/js/handler.js"></script> 
+    </script>
+    <script src="/js/nav.js"></script>
+    <script src="/js/handler.js"></script>
 
 
 </body>
