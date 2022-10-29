@@ -54,7 +54,7 @@ npm i <module-name>
 ```
 
 The used modules are:
-
+- [animatejs](https://www.npmjs.com/package/animejs)
 - [express](https://www.npmjs.com/package/express)
 - [mqtt](https://www.npmjs.com/package/mqtt)
 - [body-parser](https://www.npmjs.com/package/body-parser)
