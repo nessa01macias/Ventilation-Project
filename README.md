@@ -1,5 +1,9 @@
 # Ventilation-Project
+Created by Metropolia University of Applied Science students, 3rd yead, Smart IoT Systems major.
 #### Web Application for ABB Ventilation Controller
+
+# Description
+The web user interface covers up this section of the ABB vent control project. The web application enables user interaction with the ABB vent. The following settings can be managed via the web user interface: The user can switch between automatic and manual modes in the mode menu. Speed - When the mode is in manual mode, the user can modify the ABB vent's speed. When the automatic mode is selected, the user can modify the pressure of the ABB vent. Additionally, on the stats page, the user can view the total statistics of the data kept in the database. User sessions, user activity, and sensor data, for instance, between two different time periods By registering a teacher account, the teacher account gains access to greater privileges than student accounts and can view both student and teacher account activities.
 
 # Contents
 - [User manual](#user-manual)
