@@ -93,6 +93,6 @@ The Node.js server connects to the database via the `mongoose` module. The modul
 
 ## Controller connection
 
-We connect to the ventilation system via MQTT. To do this, we need the `mqtt` module. The setup of the connection is hardcoded in the `index.js` file. By default we publish commands to the `Group5/controller/settings` topic and subscribe to `let default_pub_topic = "Group5/controller/status` for measurement readings.
+We connect to the ventilation system via MQTT. To do this, we need the `mqtt` module. The setup of the connection is hardcoded in the `index.js` file. By default we publish commands to the `Group5/controller/settings` topic and subscribe to `Group5/controller/status` for measurement readings.
 
 ## Visual design
