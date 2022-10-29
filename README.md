@@ -1,9 +1,10 @@
 # Ventilation-Project
-Created by Metropolia University of Applied Science students, 3rd yead, Smart IoT Systems major.
+Created by Metropolia University of Applied Science IT engineering students in the Smart IoT Systems major.
+Authors: Melany Macias, Daniel Radvanyi, Ha Do, Manish Subedi, Ahmed Al-Tuwaijari
 #### Web Application for ABB Ventilation Controller
 
 # Description
-The web user interface covers up this section of the ABB vent control project. The web application enables user interaction with the ABB vent. The following settings can be managed via the web user interface: The user can switch between automatic and manual modes in the mode menu. Speed - When the mode is in manual mode, the user can modify the ABB vent's speed. When the automatic mode is selected, the user can modify the pressure of the ABB vent. Additionally, on the stats page, the user can view the total statistics of the data kept in the database. User sessions, user activity, and sensor data, for instance, between two different time periods 
+The web user interface covers up this section of the ABB ventilation control project. The web application enables user interaction with the LPCxpresso microcontroller that controls the fan and reads measurements from various sensors. The following settings can be managed via the web user interface's dashboard: the user can switch between automatic and manual modes; target speed when the user is in manual mode; target speed when the automatic mode is selected. Additionally, on the stats page, the user can view the detailed statistics of the measurement data kept in the database. User sessions, user activity and logins can be inspected on the user statistics page. The project also utilizes a separate *student* and *teacher/admin* account system. 
 # Contents
 - [User manual](#user-manual)
   * [Installation](#installation)
@@ -92,6 +93,6 @@ The Node.js server connects to the database via the `mongoose` module. The modul
 
 ## Controller connection
 
-We connect to the ventilation system via MQTT. To do this, we need the `mqtt` module. The setup of the connection is hardcoded in the `index.js` file.
+We connect to the ventilation system via MQTT. To do this, we need the `mqtt` module. The setup of the connection is hardcoded in the `index.js` file. By default we publish commands to the `Group5/controller/settings` topic and subscribe to `let default_pub_topic = "Group5/controller/status` for measurement readings.
 
 ## Visual design
