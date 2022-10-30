@@ -96,3 +96,21 @@ The Node.js server connects to the database via the `mongoose` module. The modul
 We connect to the ventilation system via MQTT. To do this, we need the `mqtt` module. The setup of the connection is hardcoded in the `index.js` file. By default we publish commands to the `Group5/controller/settings` topic and subscribe to `Group5/controller/status` for measurement readings.
 
 ## Visual design
+
+![Dashboard](UI%20images/Screenshot%202022-10-31%20001326.jpg )
+Dashboard
+
+![Login](UI%20images/Screenshot%202022-10-31%20001417.jpg )
+Log in page
+
+![Registration](UI%20images/Screenshot%202022-10-31%20001440.jpg )
+Registration page 
+
+![Sensors page](UI%20images/Screenshot%202022-10-31%20001518.jpg )
+Sensor's information page
+
+![user info page](UI%20images/Screenshot%202022-10-31%20001655.jpg )
+Student's or Teacher's info page
+
+![teacher info page](UI%20images/Screenshot%202022-10-31%20001628.jpg)
+Teacher's information page
