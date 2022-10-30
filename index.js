@@ -270,14 +270,14 @@ app.get("/getmyinfo", async (req, res) => {
 
 // Client subscribes and saves data into the database
 
-const addr = 'mqtt://192.168.1.254:1883';
-let default_pub_topic = "Group5/controller/settings"
-let default_sub_topic = "Group5/controller/status"
+// const addr = 'mqtt://192.168.1.254:1883';
+// let default_pub_topic = "Group5/controller/settings"
+// let default_sub_topic = "Group5/controller/status"
 
 // simulator
-// const addr = 'mqtt://192.168.56.1:1883';
-// let default_pub_topic = "controller/settings"
-// let default_sub_topic = "controller/status"
+const addr = 'mqtt://192.168.56.1:1883';
+let default_pub_topic = "controller/settings"
+let default_sub_topic = "controller/status"
 
 const client = mqtt.connect(addr);
 
